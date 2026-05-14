@@ -1,0 +1,90 @@
+import { Injectable } from '@nestjs/common';
+
+import type { GuestFollowUp, GuestFollowUpPayload } from '@shepherd/shared';
+
+import { MySqlService } from '../mysql.service';
+import { PrismaService } from '../prisma.service';
+import { normRow, normRows, type SpRow } from './types';
+
+const FU_SELECT = `
+  SELECT
+    followup_code      AS code,
+    guest_code         AS g_code,
+    followup_type      AS ftype,
+    followup_date      AS fdt,
+    followup_status    AS fstat,
+    guest_responded    AS responded,
+    outcome            AS outcome,
+    notes              AS notes,
+    reg_date           AS rdt,
+    done_date          AS done_dt,
+    assigned_to        AS assigned_to,
+    assigned_to_name   AS assigned_name,
+    guest_first_name   AS fname,
+    guest_other_names  AS onames,
+    guest_phone        AS pno,
+    no_response_streak AS streak
+  FROM vw_guestfollowups
+`;
+
+@Injectable()
+export class FollowUpSp {
+  constructor(
+    private readonly mysql: MySqlService,
+    private readonly prisma: PrismaService,
+  ) {}
+
+  /**
+   * sp_AddGuestFollowUp(p_GuestCode, p_Type, p_Date, p_Notes, p_AssignedTo, p_AssignedToName)
+   * Success and error branches emit columns in different orders — mysql2's
+   * named-column return preserves both correctly.
+   */
+  async addFollowUp(p: GuestFollowUpPayload): Promise<SpRow | undefined> {
+    const row = await this.mysql.callOne('sp_AddGuestFollowUp', [
+      p.g_code,
+      p.ftype,
+      p.fdt,
+      p.notes ?? null,
+      p.assigned_to,
+      null, // assigned-to-name resolved server-side
+    ]);
+    return normRow<SpRow>(row);
+  }
+
+  /** sp_CompleteGuestFollowUp(p_Code, p_Responded, p_Outcome). */
+  async completeFollowUp(
+    code: number,
+    responded: boolean,
+    outcome?: string,
+  ): Promise<SpRow | undefined> {
+    const row = await this.mysql.callOne('sp_CompleteGuestFollowUp', [
+      code,
+      responded,
+      outcome ?? null,
+    ]);
+    return normRow<SpRow>(row);
+  }
+
+  /** sp_CancelGuestFollowUp(p_Code). */
+  async cancelFollowUp(code: number): Promise<SpRow | undefined> {
+    const row = await this.mysql.callOne('sp_CancelGuestFollowUp', [code]);
+    return normRow<SpRow>(row);
+  }
+
+  async findByGuest(guestCode: number): Promise<GuestFollowUp[]> {
+    const rows = await this.prisma.$queryRawUnsafe<unknown[]>(
+      `${FU_SELECT} WHERE guest_code = ? ORDER BY followup_date DESC, followup_code DESC`,
+      guestCode,
+    );
+    return normRows<GuestFollowUp>(rows) as GuestFollowUp[];
+  }
+
+  async findPending(): Promise<GuestFollowUp[]> {
+    const rows = await this.prisma.$queryRawUnsafe<unknown[]>(
+      `${FU_SELECT} WHERE followup_status = 0
+       ORDER BY followup_date ASC, followup_code ASC
+       LIMIT 200`,
+    );
+    return normRows<GuestFollowUp>(rows) as GuestFollowUp[];
+  }
+}

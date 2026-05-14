@@ -1,0 +1,25 @@
+{
+  "name": "@shepherd/shared",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build --force",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "echo 'no tests' && exit 0",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.3.0",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.59.3"
+  }
+}

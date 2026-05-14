@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+/* Tailwind v4 theme tokens — replaces the v3 tailwind.config.js theme.extend. */
+@theme {
+  --font-sans: "Inter", system-ui, sans-serif;
+
+  --color-brand-50:  #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html, body, #app {
+  height: 100%;
+}
+
+/* ---- Component classes ----
+   Tailwind v4 forbids @apply-ing user-defined classes, so each variant lists
+   its full utility set inline.
+*/
+
+.input-sm {
+  @apply h-9 rounded-md border border-slate-300 bg-white px-3 text-sm shadow-sm
+         focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200;
+}
+
+.label-sm {
+  @apply mb-1 block text-xs font-medium uppercase tracking-wide text-slate-600;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium
+         shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50
+         bg-brand-600 text-white hover:bg-brand-700;
+}
+.btn-secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium
+         shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50
+         border border-slate-300 bg-white text-slate-700 hover:bg-slate-50;
+}
+.btn-danger {
+  @apply inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium
+         shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50
+         bg-rose-600 text-white hover:bg-rose-700;
+}
+
+.card {
+  @apply rounded-lg border border-slate-200 bg-white shadow-sm;
+}

@@ -1,0 +1,264 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model app_setts {
+  id        Int    @id @default(autoincrement())
+  item_name String @unique(map: "uk_app_setts_name") @db.VarChar(30)
+  item_val  String @db.VarChar(2500)
+  descr     String @db.VarChar(250)
+}
+
+model branch_depts {
+  id        Int      @id @default(autoincrement())
+  br_code   Int
+  dept_code Int
+  stat      Int      @default(0)
+  branches  branches @relation(fields: [br_code], references: [br_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_branch_depts_br_code")
+  depts     depts    @relation(fields: [dept_code], references: [dept_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_branch_depts_dept_code")
+
+  @@unique([br_code, dept_code], map: "uk_branch_depts_branch")
+  @@index([dept_code], map: "fk_branch_depts_dept_code")
+}
+
+model branch_ldrs {
+  id          Int       @id @default(autoincrement())
+  br_code     Int
+  member_code Int
+  dept_code   Int
+  pstn_code   Int
+  branches    branches  @relation(fields: [br_code], references: [br_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_branch_ldrs_branch")
+  depts       depts     @relation(fields: [dept_code], references: [dept_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_branch_ldrs_dept")
+  members     members   @relation(fields: [member_code], references: [member_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_branch_ldrs_member")
+  ldp_pstns   ldp_pstns @relation(fields: [pstn_code], references: [pstn_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_branch_ldrs_pstn")
+
+  @@unique([br_code, member_code, dept_code, pstn_code], map: "uk_branch_ldrs")
+  @@index([dept_code], map: "fk_branch_ldrs_dept")
+  @@index([member_code], map: "fk_branch_ldrs_member")
+  @@index([pstn_code], map: "fk_branch_ldrs_pstn")
+}
+
+model branch_users {
+  id          Int       @id @default(autoincrement())
+  user_code   Int       @unique(map: "uk_branch_users_code")
+  br_code     Int
+  user_name   String    @unique(map: "uk_branch_users_name") @db.VarChar(25)
+  member_code Int
+  reg_date    DateTime? @default(dbgenerated("(curdate())")) @db.Date
+  user_stat   Int       @default(0)
+  pwd         String    @db.VarChar(250)
+  salt        String    @db.VarChar(250)
+  user_role   Int
+  attempts    Int       @default(0)
+  change_pwd  Boolean?  @default(false)
+  last_login  DateTime? @default(dbgenerated("(curdate())")) @db.Date
+  branches    branches  @relation(fields: [br_code], references: [br_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_branch_users_branch")
+  members     members   @relation(fields: [member_code], references: [member_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_branch_users_member")
+
+  @@index([br_code], map: "fk_branch_users_branch")
+  @@index([member_code], map: "fk_branch_users_member")
+}
+
+model branches {
+  id           Int            @id @default(autoincrement())
+  br_code      Int            @unique(map: "uk_branches_code")
+  br_name      String         @db.VarChar(50)
+  stat         Int            @default(0)
+  branch_depts branch_depts[]
+  branch_ldrs  branch_ldrs[]
+  branch_users branch_users[]
+  guests       guests[]
+  members      members[]
+}
+
+model db_logs {
+  id       Int      @id @default(autoincrement())
+  log_id   Bytes    @default(dbgenerated("(uuid_to_bin(uuid()))")) @db.Binary(16)
+  log_date DateTime @default(now()) @db.DateTime(0)
+  log_type Int
+  obj_name String   @db.VarChar(100)
+  err_line Int      @default(-1)
+  log_msg  String   @db.VarChar(1500)
+}
+
+model depts {
+  id           Int            @id @default(autoincrement())
+  dept_code    Int            @unique(map: "uk_depts_code")
+  dept_name    String         @db.VarChar(50)
+  stat         Int            @default(0)
+  branch_depts branch_depts[]
+  branch_ldrs  branch_ldrs[]
+}
+
+model fam_members {
+  id          Int        @id @default(autoincrement())
+  fam_code    Int
+  member_code Int
+  type_code   Int
+  families    families   @relation(fields: [fam_code], references: [fam_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_fam_members_fam")
+  members     members    @relation(fields: [member_code], references: [member_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_fam_members_member")
+  rltn_types  rltn_types @relation(fields: [type_code], references: [type_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_fam_members_rltn")
+
+  @@unique([fam_code, member_code], map: "uk_fam_members")
+  @@index([member_code], map: "fk_fam_members_member")
+  @@index([type_code], map: "fk_fam_members_rltn")
+}
+
+model families {
+  id          Int           @id @default(autoincrement())
+  fam_code    Int           @unique(map: "uk_families")
+  member_code Int
+  fam_name    String        @db.VarChar(35)
+  fam_members fam_members[]
+  members     members       @relation(fields: [member_code], references: [member_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_families_member")
+
+  @@index([member_code], map: "fk_families_member")
+}
+
+model guest_follow_ups {
+  id               Int       @id @default(autoincrement())
+  followup_code    Int       @unique(map: "uk_guest_follow_ups_code")
+  guest_code       Int
+  followup_type    Int       @default(1)
+  followup_date    DateTime  @db.Date
+  followup_status  Int       @default(0)
+  guest_responded  Boolean   @default(false)
+  outcome          String?   @db.VarChar(500)
+  notes            String?   @db.VarChar(300)
+  assigned_to      Int       @default(0)
+  assigned_to_name String?   @db.VarChar(100)
+  reg_date         DateTime  @default(now()) @db.DateTime(0)
+  done_date        DateTime? @db.DateTime(0)
+  guests           guests    @relation(fields: [guest_code], references: [guest_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_guest_follow_ups_guest")
+
+  @@index([guest_code], map: "fk_guest_follow_ups_guest")
+}
+
+model guests {
+  id                Int                @id @default(autoincrement())
+  guest_code        Int                @unique(map: "uk_guests_code")
+  guest_id          String             @unique(map: "uk_guests_id") @db.VarChar(50)
+  br_code           Int
+  u_code            Int
+  first_name        String             @db.VarChar(25)
+  other_names       String             @db.VarChar(35)
+  phone_no          String?            @db.VarChar(15)
+  email             String?            @db.VarChar(100)
+  gender            Int                @default(0)
+  phy_address       String?            @db.VarChar(150)
+  is_returning      Boolean            @default(false)
+  visit_date        DateTime           @db.Date
+  visit_type        Int                @default(0)
+  visit_count       Int                @default(1)
+  born_again        Int                @default(0)
+  sprt_stage        Int                @default(0)
+  grp_code          Int                @default(0)
+  place_origin      String?            @db.VarChar(100)
+  origin_ref        String?            @db.VarChar(300)
+  heard_via         Int                @default(0)
+  heard_via_remarks String?            @db.VarChar(200)
+  ministry          String?            @db.VarChar(100)
+  comments          String?            @db.VarChar(500)
+  feedback          String?            @db.VarChar(500)
+  needs_follow_up   Boolean            @default(false)
+  follow_up_date    DateTime?          @db.Date
+  is_promoted       Boolean            @default(false)
+  promoted_date     DateTime?          @db.DateTime(0)
+  member_code       Int?
+  reg_date          DateTime           @default(now()) @db.DateTime(0)
+  guest_follow_ups  guest_follow_ups[]
+  branches          branches           @relation(fields: [br_code], references: [br_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_guests_branch")
+
+  @@index([br_code], map: "fk_guests_branch")
+}
+
+model ldp_pstns {
+  id          Int           @id @default(autoincrement())
+  pstn_code   Int           @unique(map: "uk_ldp_pstns")
+  pstn_name   String        @db.VarChar(35)
+  branch_ldrs branch_ldrs[]
+}
+
+model member_grps {
+  id       Int       @id @default(autoincrement())
+  grp_code Int       @unique(map: "uk_member_grps_code")
+  grp_name String    @db.VarChar(35)
+  members  members[]
+}
+
+model members {
+  id           Int            @id @default(autoincrement())
+  member_code  Int            @unique(map: "uk_members_code")
+  member_id    String         @unique(map: "uk_members_id") @db.VarChar(100)
+  br_code      Int
+  first_name   String         @db.VarChar(25)
+  other_names  String         @db.VarChar(35)
+  comm_name    String?        @db.VarChar(35)
+  phone_no     String?        @db.VarChar(15)
+  email        String?        @db.VarChar(50)
+  reg_date     DateTime?      @default(dbgenerated("(curdate())")) @db.Date
+  phy_address  String         @db.VarChar(150)
+  dob          DateTime?      @db.Date
+  gender       Int
+  member_stat  Int            @default(0)
+  remarks      String?        @db.VarChar(250)
+  grp_code     Int
+  join_date    DateTime?      @default(dbgenerated("(curdate())")) @db.Date
+  exit_date    DateTime?      @default(dbgenerated("(curdate())")) @db.Date
+  member_no    String         @db.VarChar(20)
+  branch_ldrs  branch_ldrs[]
+  branch_users branch_users[]
+  fam_members  fam_members[]
+  families     families[]
+  branches     branches       @relation(fields: [br_code], references: [br_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_members_branch")
+  member_grps  member_grps    @relation(fields: [grp_code], references: [grp_code], onDelete: NoAction, onUpdate: NoAction, map: "fk_members_grp")
+
+  @@index([br_code], map: "fk_members_branch")
+  @@index([grp_code], map: "fk_members_grp")
+}
+
+model rltn_types {
+  id          Int           @id @default(autoincrement())
+  type_code   Int           @unique(map: "uk_rltn_types")
+  type_name   String        @db.VarChar(35)
+  fam_members fam_members[]
+}
+
+model sequences {
+  seq_name  String @id @db.VarChar(50)
+  seq_value Int
+}
+
+model user_sessions {
+  id          Int      @id @default(autoincrement())
+  sess_code   Int      @unique(map: "uk_user_sessions_code")
+  sess_id     String   @unique(map: "uk_user_sessions_id") @db.VarChar(100)
+  user_code   Int
+  create_time DateTime @default(now()) @db.DateTime(0)
+  token       String   @db.VarChar(200)
+  sess_stat   Int      @default(0)
+  user_type   Int      @default(0)
+}
+
+model users {
+  id              Int      @id @default(autoincrement())
+  user_code       Int      @unique(map: "uk_users_code")
+  user_name       String   @unique(map: "uk_users_name") @db.VarChar(20)
+  full_names      String   @db.VarChar(35)
+  phone_no        String   @db.VarChar(20)
+  email           String   @db.VarChar(50)
+  pwd             String   @db.VarChar(100)
+  salt            String   @db.VarChar(100)
+  user_stat       Int      @default(0)
+  user_role       Int      @default(0)
+  last_login      DateTime @default(dbgenerated("(curdate())")) @db.DateTime(0)
+  reg_date        DateTime @default(dbgenerated("(curdate())")) @db.DateTime(0)
+  change_pwd      Boolean? @default(false)
+  pwd_change_date DateTime @default(dbgenerated("(curdate())")) @db.DateTime(0)
+  attempts        Int      @default(0)
+}
