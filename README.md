@@ -75,7 +75,7 @@ frontend             Vite + Vue 3 — branch-user SPA
 Every controller is one POST endpoint that dispatches on `act`:
 
 ```
-POST /api/v1/{auth|data|guest|member}/service
+POST /api/v1/{auth|data|guest|member|messaging}/service
 Body:  { tsp, ver, act, content, caller }
 Reply: { stat, msg, data, err_no?, ext? }
 ```
@@ -188,6 +188,7 @@ Reverse-proxy rules during the dual-stack period:
 /api/v1/data/*    → NestJS
 /api/v1/guest/*   → NestJS
 /api/v1/member/*  → NestJS
+/api/v1/messaging/* → NestJS
 /api/v1/admin/*   → .NET    (keep)
 /*                → SPA (static)
 ```
@@ -210,10 +211,10 @@ or copying the directory anywhere shared:
 
 ## Known limitations / open flags
 
-- **Messaging view is stubbed** — no backend endpoint exists yet.
-- **Session-table per-request check is skipped** — we trust the JWT. `sp_UserLogin`
-  still writes a row to `user_sessions`, but `JwtAuthGuard` doesn't re-validate
-  on every request. If the .NET admin needs cross-stack session revocation,
-  add a per-request SP call.
+- **Messaging delivery is gateway-agnostic** — the app prepares and validates SMS
+  batches (direct numbers + fellowships/member groups); integrate your SMS
+  provider in the delivery handoff.
+- **Session-table per-request check is enabled** — JWTs are accepted only while
+  `user_sessions.sess_stat=0` for the token's `(UserCode, SessionID)` pair.
 - **Throttler is 10 req / 10 s** — fine for production, but smoke tests pace
   themselves under it (`smoke-all.ts` sleeps 1.1s between calls).

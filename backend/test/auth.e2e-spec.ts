@@ -65,6 +65,21 @@ describe('AuthController (e2e)', () => {
       .expect(403);
   });
 
+  it('POST /guest/service with mismatched CSRF token → 403', async () => {
+    const loginRes = await request(app.getHttpServer())
+      .post('/api/v1/auth/login')
+      .send(envelope(0, { Username: 'Admin1', Password: 'Test@123', BranchCode: 10 }))
+      .expect(200);
+    const { cookieHeader } = authFromLogin(loginRes.headers['set-cookie']);
+
+    await request(app.getHttpServer())
+      .post('/api/v1/guest/service')
+      .set('Cookie', cookieHeader)
+      .set('BS-XSRF-TOKEN', 'tampered-token')
+      .send(envelope(208, {}))
+      .expect(403);
+  });
+
   it('POST /auth/service act=0 (logout) clears the cookie', async () => {
     const loginRes = await request(app.getHttpServer())
       .post('/api/v1/auth/login')
