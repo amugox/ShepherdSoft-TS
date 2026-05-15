@@ -8,6 +8,7 @@ import type { ApiAppContext } from '@shepherd/shared';
 
 import type { AppConfig } from '../../config/configuration';
 import type { JwtUser } from '../../common/envelope/types';
+import { PrismaService } from '../../db/prisma.service';
 
 interface RawJwtPayload {
   sub?: string;
@@ -17,7 +18,10 @@ interface RawJwtPayload {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(config: ConfigService<AppConfig, true>) {
+  constructor(
+    config: ConfigService<AppConfig, true>,
+    private readonly prisma: PrismaService,
+  ) {
     const jwtCfg = config.get('jwt', { infer: true });
     const cookieName = jwtCfg.cookieName;
     const options: StrategyOptionsWithRequest = {
@@ -37,7 +41,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     super(options);
   }
 
-  validate(_req: Request, payload: RawJwtPayload): JwtUser {
+  async validate(_req: Request, payload: RawJwtPayload): Promise<JwtUser> {
     if (!payload.userData) {
       throw new UnauthorizedException('Token missing userData claim');
     }
@@ -46,6 +50,20 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       userData = JSON.parse(payload.userData) as ApiAppContext;
     } catch {
       throw new UnauthorizedException('Malformed userData claim');
+    }
+    if (!userData.SessionID || !userData.UserCode) {
+      throw new UnauthorizedException('Token missing session details');
+    }
+    const activeSession = await this.prisma.user_sessions.findFirst({
+      where: {
+        sess_id: userData.SessionID,
+        user_code: userData.UserCode,
+        sess_stat: 0,
+      },
+      select: { id: true },
+    });
+    if (!activeSession) {
+      throw new UnauthorizedException('Session is no longer active');
     }
     return {
       sub: payload.sub ?? '',

@@ -16,7 +16,7 @@ onMounted(async () => {
   try {
     items.value = (await dataApi.getList(ListItemType.MemberGroup)) ?? [];
   } catch (err) {
-    toast.error(err instanceof Error ? err.message : 'Failed to load departments.');
+    toast.error(err instanceof Error ? err.message : 'Failed to load member groups.');
   } finally {
     loading.value = false;
   }
@@ -32,17 +32,17 @@ const columns = [
   <section class="space-y-4">
     <header>
       <h1 class="text-xl font-semibold text-slate-900">
-        Departments
+        Member groups
       </h1>
       <p class="text-sm text-slate-500">
-        Reference data — managed by admins.
+        Reference data from the member-group list.
       </p>
     </header>
     <DataTable
       :rows="items"
       :columns="columns"
       :loading="loading"
-      empty-text="No departments."
+      empty-text="No member groups."
     />
   </section>
 </template>

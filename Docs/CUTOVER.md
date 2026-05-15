@@ -135,6 +135,6 @@ JWTs minted by Nest will still verify under .NET because the keys are equal duri
 
 These were in the plan and are still unresolved at cutover time. None block go-live; record the call so it doesn't drift:
 
-1. **Sessions table.** `sp_UserLogin` writes a `user_sessions` row but Nest doesn't re-validate per request. If the .NET admin needs cross-stack session revocation, add a per-request SP call before go-live. Default: ship pure-JWT.
-2. **Messaging.** SPA route renders a stub; no backend module exists. Confirm whether messaging is in-scope for v1 or post-launch.
+1. **Messaging/Fellowships scope.** Backend modules do not exist yet and routes are
+   deferred from active navigation. Confirm whether they are in-scope for v1 or post-launch.
 3. **CSRF stress test.** Double-submit token is wired but only smoke-tested. Add an e2e spec proving the header is enforced before split-origin deploy (§1b) — not required for same-origin (§1a).

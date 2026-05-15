@@ -210,10 +210,9 @@ or copying the directory anywhere shared:
 
 ## Known limitations / open flags
 
-- **Messaging view is stubbed** — no backend endpoint exists yet.
-- **Session-table per-request check is skipped** — we trust the JWT. `sp_UserLogin`
-  still writes a row to `user_sessions`, but `JwtAuthGuard` doesn't re-validate
-  on every request. If the .NET admin needs cross-stack session revocation,
-  add a per-request SP call.
+- **Messaging and Fellowships are deferred from active navigation** — no backend
+  endpoints exist yet.
+- **Session-table per-request check is enabled** — JWTs are accepted only while
+  `user_sessions.sess_stat=0` for the token's `(UserCode, SessionID)` pair.
 - **Throttler is 10 req / 10 s** — fine for production, but smoke tests pace
   themselves under it (`smoke-all.ts` sleeps 1.1s between calls).

@@ -14,9 +14,7 @@ const items: NavItem[] = [
   { to: '/guest/followups', label: 'Follow-ups', icon: '📞' },
   { to: '/membership', label: 'Members', icon: '🧑' },
   { to: '/membership/fams', label: 'Families', icon: '🏡' },
-  { to: '/membership/depts', label: 'Departments', icon: '🗂' },
-  { to: '/membership/flsps', label: 'Fellowships', icon: '⛪' },
-  { to: '/messaging', label: 'Messaging', icon: '✉️' },
+  { to: '/membership/groups', label: 'Member groups', icon: '🗂' },
 ];
 </script>
 
