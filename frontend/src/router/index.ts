@@ -44,8 +44,9 @@ const routes: RouteRecordRaw[] = [
         children: [
           { path: '', name: 'members', component: () => import('@/views/membership/MembersView.vue') },
           { path: 'member/:code', name: 'member-detail', component: () => import('@/views/membership/MemberDetailView.vue'), props: true },
-          { path: 'depts', name: 'depts', component: () => import('@/views/membership/DeptsView.vue') },
-          { path: 'flsps', name: 'flsps', component: () => import('@/views/membership/FellowshipsView.vue') },
+          { path: 'groups', name: 'member-groups', component: () => import('@/views/membership/DeptsView.vue') },
+          { path: 'depts', redirect: '/membership/groups' },
+          { path: 'flsps', name: 'fellowships', component: () => import('@/views/membership/FellowshipsView.vue') },
           { path: 'fams', name: 'fams', component: () => import('@/views/membership/FamiliesView.vue') },
         ],
       },

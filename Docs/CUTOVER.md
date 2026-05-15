@@ -55,6 +55,7 @@ location /api/v1/auth/   { proxy_pass http://nest:3000;  }
 location /api/v1/data/   { proxy_pass http://nest:3000;  }
 location /api/v1/guest/  { proxy_pass http://nest:3000;  }
 location /api/v1/member/ { proxy_pass http://nest:3000;  }
+location /api/v1/messaging/ { proxy_pass http://nest:3000;  }
 location /api/v1/admin/  { proxy_pass http://dotnet:5000; }
 location /                { try_files $uri /index.html;   } # same-origin: served by Nest
 ```
@@ -125,7 +126,7 @@ In order:
 The rollback is the proxy rules. Flip:
 
 ```
-location /api/v1/auth|data|guest|member/   → dotnet:5000   (was → nest:3000)
+location /api/v1/auth|data|guest|member|messaging/   → dotnet:5000   (was → nest:3000)
 location /                                   → ShepherdSoft (MVC)
 ```
 
@@ -135,6 +136,5 @@ JWTs minted by Nest will still verify under .NET because the keys are equal duri
 
 These were in the plan and are still unresolved at cutover time. None block go-live; record the call so it doesn't drift:
 
-1. **Sessions table.** `sp_UserLogin` writes a `user_sessions` row but Nest doesn't re-validate per request. If the .NET admin needs cross-stack session revocation, add a per-request SP call before go-live. Default: ship pure-JWT.
-2. **Messaging.** SPA route renders a stub; no backend module exists. Confirm whether messaging is in-scope for v1 or post-launch.
-3. **CSRF stress test.** Double-submit token is wired but only smoke-tested. Add an e2e spec proving the header is enforced before split-origin deploy (§1b) — not required for same-origin (§1a).
+1. **Messaging/Fellowships scope.** Implemented in TS stack (backend `/messaging/service`
+   + SPA module). SMS gateway transport remains external integration work.

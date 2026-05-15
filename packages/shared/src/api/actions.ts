@@ -26,6 +26,10 @@ export const HTTP_API_ACTION = {
   GUEST_PROMOTE: 207,
   GUEST_GET_STATS: 208,
   GUEST_DELETE: 209,
+
+  // Messaging
+  MESSAGING_PREVIEW_RECIPIENTS: 300,
+  MESSAGING_SEND_SMS: 301,
 } as const;
 
 export type HttpApiAction = (typeof HTTP_API_ACTION)[keyof typeof HTTP_API_ACTION];

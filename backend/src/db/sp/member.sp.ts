@@ -79,37 +79,37 @@ export class MemberSp {
   }
 
   async getMember(code: number): Promise<Member | null> {
-    const rows = await this.prisma.$queryRawUnsafe<unknown[]>(
+    const rows = await this.prisma.$queryRawUnsafe(
       `${MEMBER_SELECT} WHERE member_code = ? LIMIT 1`,
       code,
-    );
+    ) as unknown[];
     return (normRows<Member>(rows)[0] as Member) ?? null;
   }
 
   async findMembers(searchText: string): Promise<Member[]> {
     const like = `%${searchText}%`;
-    const rows = await this.prisma.$queryRawUnsafe<unknown[]>(
+    const rows = await this.prisma.$queryRawUnsafe(
       `${MEMBER_SELECT}
        WHERE (? = '' OR CONCAT_WS(' ', first_name, other_names, comm_name, phone_no) LIKE ?)
        ORDER BY first_name, other_names
-       LIMIT 20`,
+      LIMIT 20`,
       searchText,
       like,
-    );
+    ) as unknown[];
     return normRows<Member>(rows) as Member[];
   }
 
   async getFamily(code: number): Promise<Family | null> {
-    const rows = await this.prisma.$queryRawUnsafe<unknown[]>(
+    const rows = await this.prisma.$queryRawUnsafe(
       `${FAM_SELECT} WHERE fam_code = ? LIMIT 1`,
       code,
-    );
+    ) as unknown[];
     return (normRows<Family>(rows)[0] as Family) ?? null;
   }
 
   async findFamilies(searchText: string): Promise<Family[]> {
     const like = `%${searchText}%`;
-    const rows = await this.prisma.$queryRawUnsafe<unknown[]>(
+    const rows = await this.prisma.$queryRawUnsafe(
       `${FAM_SELECT}
        WHERE (? = '' OR fam_name LIKE ? OR member_name LIKE ?)
        ORDER BY fam_name
@@ -117,7 +117,7 @@ export class MemberSp {
       searchText,
       like,
       like,
-    );
+    ) as unknown[];
     return normRows<Family>(rows) as Family[];
   }
 }
