@@ -50,7 +50,7 @@ const routes: RouteRecordRaw[] = [
           { path: 'fams', name: 'fams', component: () => import('@/views/membership/FamiliesView.vue') },
         ],
       },
-      { path: 'messaging', redirect: '/' },
+      { path: 'messaging', name: 'messaging', component: () => import('@/views/messaging/MessagingView.vue') },
     ],
   },
   { path: '/:pathMatch(.*)*', redirect: '/' },

@@ -7,3 +7,4 @@ export * from './domain/branch';
 export * from './domain/user';
 export * from './domain/member';
 export * from './domain/guest';
+export * from './domain/messaging';

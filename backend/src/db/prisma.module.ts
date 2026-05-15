@@ -6,11 +6,12 @@ import { DataSp } from './sp/data.sp';
 import { FollowUpSp } from './sp/followup.sp';
 import { GuestSp } from './sp/guest.sp';
 import { MemberSp } from './sp/member.sp';
+import { MessagingSp } from './sp/messaging.sp';
 import { SecuritySp } from './sp/security.sp';
 
 @Global()
 @Module({
-  providers: [PrismaService, MySqlService, SecuritySp, MemberSp, GuestSp, FollowUpSp, DataSp],
-  exports: [PrismaService, MySqlService, SecuritySp, MemberSp, GuestSp, FollowUpSp, DataSp],
+  providers: [PrismaService, MySqlService, SecuritySp, MemberSp, GuestSp, FollowUpSp, DataSp, MessagingSp],
+  exports: [PrismaService, MySqlService, SecuritySp, MemberSp, GuestSp, FollowUpSp, DataSp, MessagingSp],
 })
 export class PrismaModule {}

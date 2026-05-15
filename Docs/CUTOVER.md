@@ -55,6 +55,7 @@ location /api/v1/auth/   { proxy_pass http://nest:3000;  }
 location /api/v1/data/   { proxy_pass http://nest:3000;  }
 location /api/v1/guest/  { proxy_pass http://nest:3000;  }
 location /api/v1/member/ { proxy_pass http://nest:3000;  }
+location /api/v1/messaging/ { proxy_pass http://nest:3000;  }
 location /api/v1/admin/  { proxy_pass http://dotnet:5000; }
 location /                { try_files $uri /index.html;   } # same-origin: served by Nest
 ```
@@ -125,7 +126,7 @@ In order:
 The rollback is the proxy rules. Flip:
 
 ```
-location /api/v1/auth|data|guest|member/   → dotnet:5000   (was → nest:3000)
+location /api/v1/auth|data|guest|member|messaging/   → dotnet:5000   (was → nest:3000)
 location /                                   → ShepherdSoft (MVC)
 ```
 
@@ -135,5 +136,5 @@ JWTs minted by Nest will still verify under .NET because the keys are equal duri
 
 These were in the plan and are still unresolved at cutover time. None block go-live; record the call so it doesn't drift:
 
-1. **Messaging/Fellowships scope.** Backend modules do not exist yet and routes are
-   deferred from active navigation. Confirm whether they are in-scope for v1 or post-launch.
+1. **Messaging/Fellowships scope.** Implemented in TS stack (backend `/messaging/service`
+   + SPA module). SMS gateway transport remains external integration work.

@@ -13,6 +13,7 @@ import { GuestModule } from './guest/guest.module';
 import { LoggingModule } from './logging/logging.module';
 import { MailModule } from './mail/mail.module';
 import { MemberModule } from './member/member.module';
+import { MessagingModule } from './messaging/messaging.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { MemberModule } from './member/member.module';
     DataModule,
     GuestModule,
     MemberModule,
+    MessagingModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
