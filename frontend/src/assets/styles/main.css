@@ -1,30 +1,26 @@
 @import "tailwindcss";
 
-/* Tailwind v4 theme tokens — replaces the v3 tailwind.config.js theme.extend.
-   Tokens declared here are emitted as CSS custom properties at :root AND become
-   Tailwind utilities (bg-slate-blue, text-soft-teal, …). */
 @theme {
   --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
   --font-primary: "Inter", "Segoe UI", system-ui, sans-serif;
 
-  /* ShepherdSoft brand identity */
   --color-slate-blue:  #1e3a5f;
   --color-soft-teal:   #2dd4bf;
   --color-accent-gold: #f59e0b;
   --color-bg-neutral:  #f9fafb;
 
-  /* Brand scale — anchored on the slate-blue primary. Kept as `brand-*`
-     for backwards-compat with existing components (btn-primary, etc.). */
+  /* Brand scale anchored on slate-blue (brand-600). The 700–900 steps are
+     spaced wide enough that hover:bg-brand-700 reads as a clear state change. */
   --color-brand-50:  #eef3f9;
   --color-brand-100: #d6e1ee;
   --color-brand-200: #aac1d8;
   --color-brand-300: #7da0c1;
   --color-brand-400: #517fab;
   --color-brand-500: #305f8b;
-  --color-brand-600: #1e3a5f; /* slate-blue */
-  --color-brand-700: #182f4c;
-  --color-brand-800: #122339;
-  --color-brand-900: #0c1827;
+  --color-brand-600: #1e3a5f;
+  --color-brand-700: #142943;
+  --color-brand-800: #0d1c2e;
+  --color-brand-900: #061018;
 }
 
 :root {
@@ -51,8 +47,9 @@ html, body, #app {
 
 .btn-primary {
   @apply inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium
-         shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50
-         bg-brand-600 text-white hover:bg-brand-700;
+         shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50
+         bg-brand-600 text-white hover:bg-brand-700 hover:shadow-md
+         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 focus-visible:ring-offset-2;
 }
 .btn-secondary {
   @apply inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium
@@ -69,13 +66,10 @@ html, body, #app {
   @apply rounded-lg border border-slate-200 bg-white shadow-sm;
 }
 
-/* ---- Brand identity ---- */
-
-/* Wordmark: heavier "Shepherd", lighter "Soft" — design hierarchy.
-   Slate-blue on light neutral background hits WCAG AA (10.5:1). */
+/* Wordmark/subtitle do not lock color — consumer picks via Tailwind utilities
+   so the same components work on light and dark surfaces. */
 .brand-wordmark {
   font-family: var(--font-primary);
-  color: var(--color-slate-blue);
   letter-spacing: -0.01em;
   line-height: 1;
 }
@@ -84,13 +78,10 @@ html, body, #app {
 
 .brand-subtitle {
   font-family: var(--font-primary);
-  color: var(--color-slate-blue);
   font-weight: 500;
   letter-spacing: 0.02em;
 }
 
-/* Pulsing brand-mark loader. Used by <BrandLoader /> and any flow that
-   needs a centered loading state on brand background. */
 @keyframes brand-pulse {
   0%, 100% { transform: scale(1);    opacity: 1;   }
   50%      { transform: scale(1.08); opacity: 0.7; }
@@ -98,7 +89,6 @@ html, body, #app {
 .brand-pulse {
   animation: brand-pulse 1.6s ease-in-out infinite;
   filter: drop-shadow(0 6px 18px rgba(30, 58, 95, 0.18));
-  will-change: transform, opacity;
 }
 @media (prefers-reduced-motion: reduce) {
   .brand-pulse { animation: none; }

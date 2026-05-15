@@ -83,6 +83,7 @@ const onSubmit = async (): Promise<void> => {
       type="password"
       label="Password"
       required
+      revealable
       autocomplete="current-password"
     />
     <BaseButton
