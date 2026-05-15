@@ -41,11 +41,13 @@ export class MessagingService {
   ): Promise<unknown> {
     const message = payload?.msg?.trim() ?? '';
     if (!message) {
-      throw new BadRequestException('Message is required.');
+      throw new BadRequestException('SMS message text is required and cannot be empty.');
     }
     const recipients = await this.resolveRecipients(payload, caller);
     if (!recipients.length) {
-      throw new BadRequestException('No valid recipients found.');
+      throw new BadRequestException(
+        'No valid recipients found. Provide at least one valid phone number or select a fellowship with members.',
+      );
     }
     const result: MessagingSendResult = {
       total: recipients.length,

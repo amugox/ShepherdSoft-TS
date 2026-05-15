@@ -67,7 +67,9 @@ const sendSms = async (): Promise<void> => {
     const res = await messagingApi.send(payload.value);
     previewRows.value = res?.recipients ?? [];
     lastTotal.value = res?.total ?? 0;
-    toast.success(`SMS batch prepared for ${lastTotal.value} recipient(s).`);
+    toast.success(
+      `SMS batch prepared for ${lastTotal.value} recipient${lastTotal.value === 1 ? '' : 's'}.`,
+    );
   } catch (err) {
     toast.error(err instanceof Error ? err.message : 'Failed to prepare SMS batch.');
   } finally {
