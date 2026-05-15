@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router';
 
+import BrandLogo from '@/components/brand/BrandLogo.vue';
+
 interface NavItem {
   to: string;
   label: string;
@@ -22,12 +24,13 @@ const items: NavItem[] = [
 
 <template>
   <aside class="flex h-full w-60 shrink-0 flex-col border-r border-slate-200 bg-white">
-    <div class="flex h-14 items-center gap-2 border-b border-slate-200 px-4">
-      <div class="grid h-8 w-8 place-items-center rounded-md bg-brand-600 text-sm font-bold text-white">
-        S
-      </div>
-      <span class="text-sm font-semibold text-slate-900">ShepherdSoft</span>
-    </div>
+    <RouterLink
+      to="/"
+      class="flex h-14 items-center border-b border-slate-200 px-4 transition hover:bg-slate-50"
+      aria-label="ShepherdSoft - Church Management Software"
+    >
+      <BrandLogo variant="compact" />
+    </RouterLink>
     <nav class="flex-1 overflow-y-auto py-2">
       <RouterLink
         v-for="item in items"

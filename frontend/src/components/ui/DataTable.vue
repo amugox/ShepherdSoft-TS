@@ -1,4 +1,6 @@
 <script setup lang="ts" generic="T extends Record<string, unknown>">
+import BrandLoader from '@/components/brand/BrandLoader.vue';
+
 export interface Column<T> {
   key: keyof T | string;
   label: string;
@@ -45,9 +47,12 @@ defineEmits<{
           <tr v-if="loading">
             <td
               :colspan="columns.length"
-              class="px-4 py-10 text-center text-slate-500"
+              class="px-4 py-10"
             >
-              Loading…
+              <BrandLoader
+                :size="56"
+                label="Loading…"
+              />
             </td>
           </tr>
           <tr v-else-if="!rows.length">
