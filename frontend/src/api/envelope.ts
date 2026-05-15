@@ -5,7 +5,7 @@ import { API_STATUS } from '@shepherd/shared';
 
 import { client } from './client';
 
-export type Area = 'auth' | 'data' | 'guest' | 'member' | 'messaging';
+export type Area = 'auth' | 'data' | 'guest' | 'member' | 'messaging' | 'user';
 
 export class ApiError extends Error {
   constructor(
@@ -74,5 +74,24 @@ export const callLogin = async <T = unknown>(content: unknown): Promise<T> => {
   } catch (err) {
     if (err instanceof ApiError) throw err;
     throw envelopeFromAxiosError<T>(err, 'Login failed.');
+  }
+};
+
+export const callPublic = async <T = unknown>(path: string, content: unknown, act = 0): Promise<T> => {
+  try {
+    const { data } = await client.post<ApiResponse<T>>(path, {
+      tsp: new Date().toISOString(),
+      ver: 1,
+      act,
+      content,
+      caller: null,
+    });
+    if (data.stat !== API_STATUS.Ok) {
+      throw new ApiError(data.msg ?? 'Request failed.', data.err_no);
+    }
+    return data.data as T;
+  } catch (err) {
+    if (err instanceof ApiError) throw err;
+    throw envelopeFromAxiosError<T>(err, 'Request failed.');
   }
 };

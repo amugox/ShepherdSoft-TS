@@ -1,7 +1,14 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
-import type { ChangePasswordPayload, UserData, UserLoginPayload } from '@shepherd/shared';
+import type {
+  ChangePasswordPayload,
+  LoginOtpChallenge,
+  PasswordResetCompletePayload,
+  PasswordResetRequestPayload,
+  UserData,
+  UserLoginPayload,
+} from '@shepherd/shared';
 
 import { authApi } from '@/api/auth';
 import { install401Handler } from '@/api/client';
@@ -30,8 +37,16 @@ const resetDependentStores = (): void => {
   useMemberStore().reset();
 };
 
+const isOtpChallenge = (value: unknown): value is LoginOtpChallenge =>
+  typeof value === 'object'
+  && value !== null
+  && 'requiresOtp' in value
+  && (value as { requiresOtp?: unknown }).requiresOtp === true;
+
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<UserData | null>(null);
+  const otpChallenge = ref<LoginOtpChallenge | null>(null);
+  const pendingLogin = ref<Omit<UserLoginPayload, 'OtpCode' | 'OtpChallengeId'> | null>(null);
 
   const isAuthenticated = computed(() => user.value !== null);
   const role = computed(() => user.value?.role ?? '');
@@ -64,8 +79,37 @@ export const useAuthStore = defineStore('auth', () => {
   const login = async (payload: UserLoginPayload): Promise<void> => {
     ensureUnauthorizedHandler();
     const data = await authApi.login(payload);
-    user.value = data;
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stripSensitive(data)));
+    if (isOtpChallenge(data)) {
+      otpChallenge.value = data;
+      pendingLogin.value = {
+        Username: payload.Username,
+        Password: payload.Password,
+        BranchCode: payload.BranchCode,
+        RememberMe: payload.RememberMe,
+      };
+      return;
+    }
+    otpChallenge.value = null;
+    pendingLogin.value = null;
+    user.value = data as UserData;
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stripSensitive(data as UserData)));
+  };
+
+  const verifyLoginOtp = async (otpCode: string): Promise<void> => {
+    if (!otpChallenge.value || !pendingLogin.value) return;
+    await login({
+      ...pendingLogin.value,
+      OtpChallengeId: otpChallenge.value.challengeId,
+      OtpCode: otpCode,
+    });
+  };
+
+  const requestPasswordReset = async (payload: PasswordResetRequestPayload): Promise<void> => {
+    await authApi.requestPasswordReset(payload);
+  };
+
+  const completePasswordReset = async (payload: PasswordResetCompletePayload): Promise<void> => {
+    await authApi.completePasswordReset(payload);
   };
 
   const logout = async (): Promise<void> => {
@@ -75,6 +119,8 @@ export const useAuthStore = defineStore('auth', () => {
       // Always proceed with client-side logout — the cookie may be expired.
     }
     user.value = null;
+    otpChallenge.value = null;
+    pendingLogin.value = null;
     window.localStorage.removeItem(STORAGE_KEY);
     resetDependentStores();
     await router.push('/auth/login');
@@ -92,8 +138,12 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     isAuthenticated,
     role,
+    otpChallenge,
     hydrateFromStorage,
     login,
+    verifyLoginOtp,
+    requestPasswordReset,
+    completePasswordReset,
     logout,
     changePassword,
   };
