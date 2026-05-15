@@ -1,6 +1,5 @@
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { AUTH_API_ACTION } from '@shepherd/shared';
 
 import { bootstrapTestApp, envelope, authFromLogin } from './app.factory';
 
@@ -151,7 +150,7 @@ describe('AuthController (e2e)', () => {
       .post('/api/v1/auth/service')
       .set('Cookie', auth.cookieHeader)
       .set('BS-XSRF-TOKEN', auth.csrfToken)
-      .send(envelope(AUTH_API_ACTION.AUTH_GET_SYSTEM_2FA))
+      .send(envelope(102))
       .expect(200);
     expect(current.body.stat).toBe(0);
     expect(typeof current.body.data?.enabled).toBe('boolean');
@@ -163,14 +162,14 @@ describe('AuthController (e2e)', () => {
       .post('/api/v1/auth/service')
       .set('Cookie', auth.cookieHeader)
       .set('BS-XSRF-TOKEN', auth.csrfToken)
-      .send(envelope(AUTH_API_ACTION.AUTH_SET_SYSTEM_2FA, { enabled: toggled }))
+      .send(envelope(103, { enabled: toggled }))
       .expect(200);
 
     const after = await request(app.getHttpServer())
       .post('/api/v1/auth/service')
       .set('Cookie', auth.cookieHeader)
       .set('BS-XSRF-TOKEN', auth.csrfToken)
-      .send(envelope(AUTH_API_ACTION.AUTH_GET_SYSTEM_2FA))
+      .send(envelope(102))
       .expect(200);
     expect(after.body.data?.enabled).toBe(toggled);
 
@@ -178,7 +177,7 @@ describe('AuthController (e2e)', () => {
       .post('/api/v1/auth/service')
       .set('Cookie', auth.cookieHeader)
       .set('BS-XSRF-TOKEN', auth.csrfToken)
-      .send(envelope(AUTH_API_ACTION.AUTH_SET_SYSTEM_2FA, { enabled: original }))
+      .send(envelope(103, { enabled: original }))
       .expect(200);
   });
 });

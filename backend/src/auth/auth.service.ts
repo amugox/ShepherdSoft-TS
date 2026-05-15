@@ -75,7 +75,6 @@ export class AuthService {
     const userRole   = String(loginRow.data2 ?? '');
     const changePass = String(loginRow.data3 ?? '') === '1';
     const branchName = String(loginRow.data4 ?? '');
-    const system2faEnabled = await this.getSystem2FaEnabled();
 
     const ctx: ApiAppContext = {
       UserCode:   userCode,
@@ -100,7 +99,6 @@ export class AuthService {
         tkn:      jwt,
         role:     userRole,
         cpass:    changePass,
-        s2fa:     system2faEnabled,
         ltm:      new Date().toISOString(),
       },
     };

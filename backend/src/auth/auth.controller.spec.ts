@@ -1,8 +1,6 @@
 import { ForbiddenException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { AUTH_API_ACTION } from '@shepherd/shared';
-
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
@@ -25,7 +23,7 @@ describe('AuthController', () => {
     }),
   } as unknown as ConfigService;
 
-  const controller = new AuthController(authMock, configMock);
+  const controller = new AuthController(authMock, configMock as never);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -35,7 +33,7 @@ describe('AuthController', () => {
     authMock.getSystem2FaState.mockResolvedValue({ enabled: true });
 
     const response = await controller.service(
-      { act: AUTH_API_ACTION.AUTH_GET_SYSTEM_2FA } as never,
+      { act: 102 } as never,
       { ucode: 1, url: 'Admin' } as never,
       {} as never,
       {} as never,
@@ -50,7 +48,7 @@ describe('AuthController', () => {
 
   it('blocks non-admin users from AUTH_SET_SYSTEM_2FA', async () => {
     await expect(controller.service(
-      { act: AUTH_API_ACTION.AUTH_SET_SYSTEM_2FA, content: { enabled: true } } as never,
+      { act: 103, content: { enabled: true } } as never,
       { ucode: 2, url: 'User' } as never,
       {} as never,
       {} as never,

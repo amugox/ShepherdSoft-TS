@@ -17,7 +17,6 @@ import type { Response } from 'express';
 import {
   AUTH_API_ACTION,
   type ChangePasswordPayload,
-  type SetSystem2FaPayload,
   type UserLoginPayload,
 } from '@shepherd/shared';
 
@@ -30,6 +29,13 @@ import { CallerInterceptor } from '../common/interceptors/caller.interceptor';
 import type { RequestWithCaller } from '../common/envelope/types';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { AuthService } from './auth.service';
+
+const AUTH_GET_SYSTEM_2FA = 102;
+const AUTH_SET_SYSTEM_2FA = 103;
+
+interface SetSystem2FaPayload {
+  enabled: boolean;
+}
 
 @Controller('auth')
 export class AuthController {
@@ -86,11 +92,11 @@ export class AuthController {
         const result = await this.auth.changePassword(caller.ucode, body.content as ChangePasswordPayload);
         return rawEnvelope({ stat: 0, msg: result.msg });
       }
-      case AUTH_API_ACTION.AUTH_GET_SYSTEM_2FA: {
+      case AUTH_GET_SYSTEM_2FA: {
         const result = await this.auth.getSystem2FaState();
         return rawEnvelope({ stat: 0, msg: 'OK', data: result });
       }
-      case AUTH_API_ACTION.AUTH_SET_SYSTEM_2FA: {
+      case AUTH_SET_SYSTEM_2FA: {
         this.assertAdmin(caller.url);
         const content = body.content as SetSystem2FaPayload | undefined;
         if (!content || typeof content.enabled !== 'boolean') {
