@@ -81,7 +81,8 @@ Reply: { stat, msg, data, err_no?, ext? }
 ```
 
 Action codes match `ShepherdSoft.DBL.Consts.HTTP_API_ACTION` verbatim (1, 2,
-100–105, 200–209, plus `AUTH_CHANGE_PASS=101`).
+100–105, 200–209, plus auth actions `AUTH_CHANGE_PASS=101`,
+`AUTH_GET_SYSTEM_2FA=102`, `AUTH_SET_SYSTEM_2FA=103`).
 
 JWT is issued in an **HttpOnly Secure** cookie named `shp_jwt`. The same JWT
 is also returned in the response body of `/auth/login` (mirrors the .NET

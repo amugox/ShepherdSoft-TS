@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 
 import {
+  ForbiddenException,
   Body,
   Controller,
   HttpCode,
@@ -16,6 +17,7 @@ import type { Response } from 'express';
 import {
   AUTH_API_ACTION,
   type ChangePasswordPayload,
+  type SetSystem2FaPayload,
   type UserLoginPayload,
 } from '@shepherd/shared';
 
@@ -84,9 +86,36 @@ export class AuthController {
         const result = await this.auth.changePassword(caller.ucode, body.content as ChangePasswordPayload);
         return rawEnvelope({ stat: 0, msg: result.msg });
       }
+      case AUTH_API_ACTION.AUTH_GET_SYSTEM_2FA: {
+        const result = await this.auth.getSystem2FaState();
+        return rawEnvelope({ stat: 0, msg: 'OK', data: result });
+      }
+      case AUTH_API_ACTION.AUTH_SET_SYSTEM_2FA: {
+        this.assertAdmin(caller.url);
+        const content = body.content as SetSystem2FaPayload | undefined;
+        if (!content || typeof content.enabled !== 'boolean') {
+          return rawEnvelope({ stat: 1, msg: 'Missing system 2FA payload.', err_no: 'ERR-AUTH-02' });
+        }
+        const result = await this.auth.setSystem2FaState(content.enabled, caller.ucode);
+        return rawEnvelope({ stat: 0, msg: 'System 2FA updated.', data: result });
+      }
       default:
         return rawEnvelope({ stat: 1, msg: 'Unsupported action.', err_no: 'ERR-01' });
     }
+  }
+
+  private assertAdmin(role: string | undefined): void {
+    if (!this.isAdminRole(role)) {
+      throw new ForbiddenException('Only administrators can change system 2FA settings.');
+    }
+  }
+
+  private isAdminRole(role: string | undefined): boolean {
+    if (!role) return false;
+    const normalized = role.trim().toLowerCase();
+    if (normalized.includes('admin')) return true;
+    const asNumber = Number(normalized);
+    return Number.isFinite(asNumber) && (asNumber === 0 || asNumber === 1);
   }
 
   private setAuthCookies(res: Response, jwt: string): void {

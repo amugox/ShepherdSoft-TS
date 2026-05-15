@@ -38,6 +38,8 @@ export type HttpApiAction = (typeof HTTP_API_ACTION)[keyof typeof HTTP_API_ACTIO
 export const AUTH_API_ACTION = {
   AUTH_LOGOUT: 0,
   AUTH_CHANGE_PASS: 101,
+  AUTH_GET_SYSTEM_2FA: 102,
+  AUTH_SET_SYSTEM_2FA: 103,
 } as const;
 
 export type AuthApiAction = (typeof AUTH_API_ACTION)[keyof typeof AUTH_API_ACTION];

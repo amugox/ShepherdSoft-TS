@@ -51,6 +51,7 @@ const routes: RouteRecordRaw[] = [
         ],
       },
       { path: 'messaging', name: 'messaging', component: () => import('@/views/messaging/MessagingView.vue') },
+      { path: 'settings/security', name: 'settings-security', component: () => import('@/views/settings/SecurityView.vue') },
     ],
   },
   { path: '/:pathMatch(.*)*', redirect: '/' },

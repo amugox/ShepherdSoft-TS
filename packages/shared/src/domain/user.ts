@@ -40,6 +40,7 @@ export interface UserData {
   ltm?: string;
   role?: string;
   cpass?: boolean;
+  s2fa?: boolean;
 }
 
 /**
@@ -49,6 +50,16 @@ export interface ChangePasswordPayload {
   OldPassword: string;
   NewPassword: string;
   ConfirmPassword: string;
+}
+
+/** System-wide 2FA toggle state. */
+export interface System2FaState {
+  enabled: boolean;
+}
+
+/** Update payload for system-wide 2FA toggle. */
+export interface SetSystem2FaPayload {
+  enabled: boolean;
 }
 
 /**

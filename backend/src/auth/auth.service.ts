@@ -17,6 +17,8 @@ export interface LoginResult {
 @Injectable()
 export class AuthService {
   private readonly log = new Logger(AuthService.name);
+  private static readonly SYSTEM_2FA_SETTING_KEY = 'SYSTEM_2FA_ENABLED';
+  private static readonly SYSTEM_2FA_SETTING_DESC = 'System-wide 2FA toggle';
 
   constructor(
     private readonly security: SecuritySp,
@@ -73,6 +75,7 @@ export class AuthService {
     const userRole   = String(loginRow.data2 ?? '');
     const changePass = String(loginRow.data3 ?? '') === '1';
     const branchName = String(loginRow.data4 ?? '');
+    const system2faEnabled = await this.getSystem2FaEnabled();
 
     const ctx: ApiAppContext = {
       UserCode:   userCode,
@@ -97,6 +100,7 @@ export class AuthService {
         tkn:      jwt,
         role:     userRole,
         cpass:    changePass,
+        s2fa:     system2faEnabled,
         ltm:      new Date().toISOString(),
       },
     };
@@ -124,5 +128,59 @@ export class AuthService {
       throw new BadRequestException(result?.resp_message ?? 'Failed to change password.');
     }
     return { msg: result.resp_message };
+  }
+
+  async getSystem2FaState(): Promise<{ enabled: boolean }> {
+    return { enabled: await this.getSystem2FaEnabled() };
+  }
+
+  async setSystem2FaState(enabled: boolean, actorCode: number): Promise<{ enabled: boolean }> {
+    const current = await this.getSystem2FaEnabled();
+    await this.prisma.app_setts.upsert({
+      where: { item_name: AuthService.SYSTEM_2FA_SETTING_KEY },
+      create: {
+        item_name: AuthService.SYSTEM_2FA_SETTING_KEY,
+        item_val: enabled ? '1' : '0',
+        descr: AuthService.SYSTEM_2FA_SETTING_DESC,
+      },
+      update: {
+        item_val: enabled ? '1' : '0',
+      },
+    });
+
+    if (current !== enabled) {
+      await this.auditSystem2FaChange(actorCode, current, enabled);
+    }
+
+    return { enabled };
+  }
+
+  private async getSystem2FaEnabled(): Promise<boolean> {
+    const setting = await this.prisma.app_setts.findUnique({
+      where: { item_name: AuthService.SYSTEM_2FA_SETTING_KEY },
+      select: { item_val: true },
+    });
+    return this.toBoolean(setting?.item_val);
+  }
+
+  private toBoolean(raw: string | undefined): boolean {
+    if (!raw) return false;
+    const normalized = raw.trim().toLowerCase();
+    return ['1', 'true', 'yes', 'on'].includes(normalized);
+  }
+
+  private async auditSystem2FaChange(actorCode: number, from: boolean, to: boolean): Promise<void> {
+    try {
+      await this.prisma.db_logs.create({
+        data: {
+          log_type: 0,
+          obj_name: 'auth.system_2fa',
+          err_line: -1,
+          log_msg: `actor=${actorCode};from=${from ? 1 : 0};to=${to ? 1 : 0}`,
+        },
+      });
+    } catch (err) {
+      this.log.warn(`Failed to audit system 2FA change: ${(err as Error).message}`);
+    }
   }
 }
