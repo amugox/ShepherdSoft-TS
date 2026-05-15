@@ -33,10 +33,10 @@ export class DataSp {
 
   /** fn_GenMemberNo(p_BrCode) — utility scalar function. */
   async genMemberNo(brCode: number): Promise<string> {
-    const rows = await this.prisma.$queryRawUnsafe<Array<{ no: string }>>(
+    const rows = await this.prisma.$queryRawUnsafe(
       'SELECT fn_GenMemberNo(?) AS no',
       brCode,
-    );
+    ) as Array<{ no: string }>;
     return rows[0]?.no ?? '';
   }
 }

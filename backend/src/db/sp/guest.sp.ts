@@ -105,10 +105,10 @@ export class GuestSp {
   }
 
   async getGuest(code: number): Promise<Guest | null> {
-    const rows = await this.prisma.$queryRawUnsafe<unknown[]>(
+    const rows = await this.prisma.$queryRawUnsafe(
       `${GUEST_SELECT} WHERE guest_code = ? LIMIT 1`,
       code,
-    );
+    ) as unknown[];
     return (normRows<Guest>(rows)[0] as Guest) ?? null;
   }
 
@@ -119,7 +119,7 @@ export class GuestSp {
     const sstage = f.sstage ?? null;
     const fuStat = f.fu_stat ?? null;
 
-    const rows = await this.prisma.$queryRawUnsafe<unknown[]>(
+    const rows = await this.prisma.$queryRawUnsafe(
       `
       SELECT g.*
       FROM (${GUEST_SELECT}) g
@@ -143,14 +143,12 @@ export class GuestSp {
       sstage,
       fuStat,
       fuStat,
-    );
+    ) as unknown[];
     return normRows<Guest>(rows) as Guest[];
   }
 
   async getStats(): Promise<GuestStats> {
-    const rows = await this.prisma.$queryRawUnsafe<
-      Array<{ guests_mo: number | bigint; pending_fu: number | bigint; overdue_fu: number | bigint; promoted_mo: number | bigint }>
-    >(`
+    const rows = await this.prisma.$queryRawUnsafe(`
       SELECT
         (SELECT COUNT(*) FROM guests
           WHERE YEAR(reg_date)  = YEAR(CURDATE())
@@ -164,7 +162,7 @@ export class GuestSp {
           WHERE is_promoted = 1
             AND YEAR(promoted_date)  = YEAR(CURDATE())
             AND MONTH(promoted_date) = MONTH(CURDATE()))                   AS promoted_mo
-    `);
+    `) as Array<{ guests_mo: number | bigint; pending_fu: number | bigint; overdue_fu: number | bigint; promoted_mo: number | bigint }>;
     const row = rows[0] ?? { guests_mo: 0, pending_fu: 0, overdue_fu: 0, promoted_mo: 0 };
     return {
       guests_mo:   Number(row.guests_mo),

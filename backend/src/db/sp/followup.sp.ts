@@ -72,19 +72,19 @@ export class FollowUpSp {
   }
 
   async findByGuest(guestCode: number): Promise<GuestFollowUp[]> {
-    const rows = await this.prisma.$queryRawUnsafe<unknown[]>(
+    const rows = await this.prisma.$queryRawUnsafe(
       `${FU_SELECT} WHERE guest_code = ? ORDER BY followup_date DESC, followup_code DESC`,
       guestCode,
-    );
+    ) as unknown[];
     return normRows<GuestFollowUp>(rows) as GuestFollowUp[];
   }
 
   async findPending(): Promise<GuestFollowUp[]> {
-    const rows = await this.prisma.$queryRawUnsafe<unknown[]>(
+    const rows = await this.prisma.$queryRawUnsafe(
       `${FU_SELECT} WHERE followup_status = 0
        ORDER BY followup_date ASC, followup_code ASC
        LIMIT 200`,
-    );
+    ) as unknown[];
     return normRows<GuestFollowUp>(rows) as GuestFollowUp[];
   }
 }

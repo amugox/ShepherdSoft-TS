@@ -137,4 +137,3 @@ These were in the plan and are still unresolved at cutover time. None block go-l
 
 1. **Messaging/Fellowships scope.** Backend modules do not exist yet and routes are
    deferred from active navigation. Confirm whether they are in-scope for v1 or post-launch.
-3. **CSRF stress test.** Double-submit token is wired but only smoke-tested. Add an e2e spec proving the header is enforced before split-origin deploy (§1b) — not required for same-origin (§1a).
