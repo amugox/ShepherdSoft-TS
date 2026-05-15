@@ -40,6 +40,22 @@ export const AUTH_API_ACTION = {
   AUTH_CHANGE_PASS: 101,
   AUTH_GET_SYSTEM_2FA: 102,
   AUTH_SET_SYSTEM_2FA: 103,
+  AUTH_REQUEST_PASSWORD_RESET: 104,
+  AUTH_ADMIN_TRIGGER_PASSWORD_RESET: 105,
 } as const;
 
 export type AuthApiAction = (typeof AUTH_API_ACTION)[keyof typeof AUTH_API_ACTION];
+
+/** User-management action codes routed via /user/service. */
+export const USER_API_ACTION = {
+  USER_LIST: 400,
+  USER_GET: 401,
+  USER_CREATE: 402,
+  USER_UPDATE: 403,
+  USER_DEACTIVATE: 404,
+  USER_RESET_PASSWORD_REQUEST: 405,
+  USER_PASSWORD_RESET_COMPLETE: 406,
+  USER_ROLES_LIST: 407,
+} as const;
+
+export type UserApiAction = (typeof USER_API_ACTION)[keyof typeof USER_API_ACTION];

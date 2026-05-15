@@ -1,7 +1,6 @@
 import { randomBytes } from 'node:crypto';
 
 import {
-  ForbiddenException,
   Body,
   Controller,
   HttpCode,
@@ -17,6 +16,8 @@ import type { Response } from 'express';
 import {
   AUTH_API_ACTION,
   type ChangePasswordPayload,
+  type PasswordResetCompletePayload,
+  type PasswordResetRequestPayload,
   type UserLoginPayload,
 } from '@shepherd/shared';
 
@@ -28,6 +29,7 @@ import { rawEnvelope } from '../common/envelope/api-response';
 import { CallerInterceptor } from '../common/interceptors/caller.interceptor';
 import type { RequestWithCaller } from '../common/envelope/types';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { Permission, assertPermission } from './rbac';
 import { AuthService } from './auth.service';
 
 const AUTH_GET_SYSTEM_2FA = 102;
@@ -62,8 +64,39 @@ export class AuthController {
       return rawEnvelope({ stat: 1, msg: 'Missing login payload.', err_no: 'ERR-AUTH-01' });
     }
     const result = await this.auth.login(content);
-    this.setAuthCookies(res, result.jwt);
-    return result.user;
+    if (result.jwt && result.user) {
+      this.setAuthCookies(res, result.jwt);
+      return result.user;
+    }
+    return result.challenge;
+  }
+
+  @Public()
+  @Post('password-reset/request')
+  @HttpCode(200)
+  async requestPasswordReset(
+    @Body() body: ApiRequestDto<PasswordResetRequestPayload>,
+  ): Promise<unknown> {
+    const content = body.content;
+    if (!content) {
+      return rawEnvelope({ stat: 1, msg: 'Missing reset payload.', err_no: 'ERR-AUTH-03' });
+    }
+    const result = await this.auth.requestPasswordReset(content);
+    return rawEnvelope({ stat: 0, msg: result.msg });
+  }
+
+  @Public()
+  @Post('password-reset/complete')
+  @HttpCode(200)
+  async completePasswordReset(
+    @Body() body: ApiRequestDto<PasswordResetCompletePayload>,
+  ): Promise<unknown> {
+    const content = body.content;
+    if (!content) {
+      return rawEnvelope({ stat: 1, msg: 'Missing reset payload.', err_no: 'ERR-AUTH-04' });
+    }
+    const result = await this.auth.completePasswordReset(content);
+    return rawEnvelope({ stat: 0, msg: result.msg });
   }
 
   /**
@@ -97,7 +130,7 @@ export class AuthController {
         return rawEnvelope({ stat: 0, msg: 'OK', data: result });
       }
       case AUTH_SET_SYSTEM_2FA: {
-        this.assertAdmin(caller.url);
+        assertPermission(caller.url, Permission.SecurityManage, 'Only administrators can change system 2FA settings.');
         const content = body.content as SetSystem2FaPayload | undefined;
         if (!content || typeof content.enabled !== 'boolean') {
           return rawEnvelope({ stat: 1, msg: 'Missing system 2FA payload.', err_no: 'ERR-AUTH-02' });
@@ -105,23 +138,26 @@ export class AuthController {
         const result = await this.auth.setSystem2FaState(content.enabled, caller.ucode);
         return rawEnvelope({ stat: 0, msg: 'System 2FA updated.', data: result });
       }
+      case AUTH_API_ACTION.AUTH_REQUEST_PASSWORD_RESET: {
+        const content = body.content as PasswordResetRequestPayload | undefined;
+        if (!content) {
+          return rawEnvelope({ stat: 1, msg: 'Missing reset payload.', err_no: 'ERR-AUTH-03' });
+        }
+        const result = await this.auth.requestPasswordReset(content);
+        return rawEnvelope({ stat: 0, msg: result.msg });
+      }
+      case AUTH_API_ACTION.AUTH_ADMIN_TRIGGER_PASSWORD_RESET: {
+        assertPermission(caller.url, Permission.UserReset, 'Only administrators can trigger user password resets.');
+        const content = body.content as { user_code?: number } | undefined;
+        if (!content?.user_code) {
+          return rawEnvelope({ stat: 1, msg: 'Missing target user code.', err_no: 'ERR-AUTH-05' });
+        }
+        const result = await this.auth.requestPasswordResetForUser(content.user_code, caller.ucode);
+        return rawEnvelope({ stat: 0, msg: result.msg });
+      }
       default:
         return rawEnvelope({ stat: 1, msg: 'Unsupported action.', err_no: 'ERR-01' });
     }
-  }
-
-  private assertAdmin(role: string | undefined): void {
-    if (!this.isAdminRole(role)) {
-      throw new ForbiddenException('Only administrators can change system 2FA settings.');
-    }
-  }
-
-  private isAdminRole(role: string | undefined): boolean {
-    if (!role) return false;
-    const normalized = role.trim().toLowerCase();
-    if (normalized.includes('admin')) return true;
-    const asNumber = Number(normalized);
-    return Number.isFinite(asNumber) && (asNumber === 0 || asNumber === 1);
   }
 
   private setAuthCookies(res: Response, jwt: string): void {

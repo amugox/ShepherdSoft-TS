@@ -11,6 +11,9 @@ describe('AuthController', () => {
     changePassword: jest.fn(),
     getSystem2FaState: jest.fn(),
     setSystem2FaState: jest.fn(),
+    requestPasswordReset: jest.fn(),
+    requestPasswordResetForUser: jest.fn(),
+    completePasswordReset: jest.fn(),
   } as unknown as jest.Mocked<AuthService>;
 
   const configMock = {

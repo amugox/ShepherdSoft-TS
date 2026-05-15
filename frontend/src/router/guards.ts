@@ -8,6 +8,8 @@ declare module 'vue-router' {
     requiresAuth?: boolean;
     /** Set to true on routes that should bounce *away* if already logged in (login page). */
     publicOnly?: boolean;
+    /** Restrict route to admin/super-admin users. */
+    requiresAdmin?: boolean;
   }
 }
 
@@ -24,6 +26,11 @@ export const globalAuthGuard: NavigationGuardWithThis<undefined> = (
   const requiresAuth = to.meta.requiresAuth ?? true;
   if (requiresAuth && !auth.isAuthenticated) {
     return { path: '/auth/login', query: { return: to.fullPath } };
+  }
+  if (to.meta.requiresAdmin) {
+    const normalized = (auth.user?.role ?? '').trim().toLowerCase();
+    const isAdmin = normalized.includes('admin') || normalized === '0' || normalized === '1';
+    if (!isAdmin) return { path: '/' };
   }
   return true;
 };

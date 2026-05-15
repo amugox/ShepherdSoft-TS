@@ -64,7 +64,12 @@ const openGroups = ref<Record<string, boolean>>({});
 const isAdmin = computed(() => (auth.user?.role ?? '').toLowerCase().includes('admin'));
 const items = computed<NavItem[]>(() => [
   ...baseItems,
-  ...(isAdmin.value ? [{ type: 'link', to: '/settings/security', label: 'Security', icon: '🔐' } satisfies NavLinkItem] : []),
+  ...(isAdmin.value
+    ? [
+      { type: 'link', to: '/settings/users', label: 'Users', icon: '🧑‍💼' } satisfies NavLinkItem,
+      { type: 'link', to: '/settings/security', label: 'Security', icon: '🔐' } satisfies NavLinkItem,
+    ]
+    : []),
 ]);
 
 const groupedItems = computed(() => items.value.filter((item): item is NavGroupItem => item.type === 'group'));
