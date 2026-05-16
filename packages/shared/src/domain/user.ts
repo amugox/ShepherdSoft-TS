@@ -139,6 +139,17 @@ export interface PasswordResetCompletePayload {
   confirmPassword: string;
 }
 
+/** Profile data returned by AUTH_GET_PROFILE. */
+export interface UserProfileData {
+  user_code: number;
+  user_name: string;
+  full_name: string | null;
+  email: string | null;
+  role: string | null;
+  branch_name: string | null;
+  last_login: string | null;
+}
+
 /**
  * Payload stored inside the JWT's "userData" claim. Matches
  * ShepherdSoft.DBL.Models.ApiAppModel field shape so a token issued by either

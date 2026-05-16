@@ -30,6 +30,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: '', name: 'home', component: () => import('@/views/HomeView.vue') },
       { path: 'privacy', name: 'privacy', component: () => import('@/views/PrivacyView.vue') },
+      { path: 'profile', name: 'profile', component: () => import('@/views/profile/ProfileView.vue') },
       {
         path: 'guest',
         children: [

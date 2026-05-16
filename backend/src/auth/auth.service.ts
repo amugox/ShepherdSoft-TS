@@ -167,6 +167,33 @@ export class AuthService {
     };
   }
 
+  async getProfile(userCode: number, brCode: number): Promise<UserIdentity & { role: string; branch_name: string; last_login: string | null }> {
+    const rows = await this.prisma.$queryRawUnsafe(
+      `SELECT bu.user_code, bu.br_code, bu.user_name, bu.member_code,
+              m.email AS email,
+              CONCAT_WS(' ', m.first_name, m.other_names) AS full_name,
+              CASE bu.user_role
+                WHEN 0 THEN 'Super Admin'
+                WHEN 1 THEN 'Admin'
+                WHEN 2 THEN 'Standard User'
+                WHEN 3 THEN 'Viewer'
+                ELSE CAST(bu.user_role AS CHAR)
+              END AS role,
+              b.br_name AS branch_name,
+              DATE_FORMAT(bu.last_login, '%Y-%m-%d %H:%i:%s') AS last_login
+       FROM branch_users bu
+       LEFT JOIN members m ON m.member_code = bu.member_code
+       LEFT JOIN branches b ON b.br_code = bu.br_code
+       WHERE bu.user_code = ? AND bu.br_code = ?
+       LIMIT 1`,
+      userCode,
+      brCode,
+    ) as Array<UserIdentity & { role: string; branch_name: string; last_login: string | null }>;
+    const row = rows[0];
+    if (!row) throw new BadRequestException('User not found.');
+    return row;
+  }
+
   async changePassword(userCode: number, payload: ChangePasswordPayload): Promise<{ msg: string }> {
     if (!payload.OldPassword || !payload.NewPassword) {
       throw new BadRequestException('Old and new password are required.');

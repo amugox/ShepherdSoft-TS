@@ -7,6 +7,7 @@ import {
   type SetSystem2FaPayload,
   type System2FaState,
   type UserLoginPayload,
+  type UserProfileData,
 } from '@shepherd/shared';
 
 import { call, callLogin, callPublic } from './envelope';
@@ -30,4 +31,7 @@ export const authApi = {
 
   completePasswordReset: (payload: PasswordResetCompletePayload): Promise<unknown> =>
     callPublic('/auth/password-reset/complete', payload),
+
+  getProfile: (): Promise<UserProfileData | undefined> =>
+    call<UserProfileData>('auth', AUTH_API_ACTION.AUTH_GET_PROFILE),
 };
