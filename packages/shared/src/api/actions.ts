@@ -42,6 +42,7 @@ export const AUTH_API_ACTION = {
   AUTH_SET_SYSTEM_2FA: 103,
   AUTH_REQUEST_PASSWORD_RESET: 104,
   AUTH_ADMIN_TRIGGER_PASSWORD_RESET: 105,
+  AUTH_GET_PROFILE: 106,
 } as const;
 
 export type AuthApiAction = (typeof AUTH_API_ACTION)[keyof typeof AUTH_API_ACTION];

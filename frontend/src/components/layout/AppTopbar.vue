@@ -13,7 +13,7 @@ const branch = computed(() => auth.user?.br_name ?? '');
 const logout = async (): Promise<void> => {
   await auth.logout();
 };
-const goChangePass = (): Promise<unknown> => router.push('/auth/changepass');
+const goProfile = (): Promise<unknown> => router.push('/profile');
 </script>
 
 <template>
@@ -43,9 +43,9 @@ const goChangePass = (): Promise<unknown> => router.push('/auth/changepass');
           <div class="absolute right-0 z-30 mt-1 w-48 rounded-md border border-slate-200 bg-white shadow-lg">
             <button
               class="block w-full px-4 py-2 text-left text-sm hover:bg-slate-50"
-              @click="goChangePass"
+              @click="goProfile"
             >
-              Change password
+              My Profile
             </button>
             <button
               class="block w-full px-4 py-2 text-left text-sm text-rose-600 hover:bg-rose-50"

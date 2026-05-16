@@ -121,6 +121,10 @@ export class AuthController {
         this.clearAuthCookies(res);
         return rawEnvelope({ stat: 0, msg: 'Logged out.' });
       }
+      case AUTH_API_ACTION.AUTH_GET_PROFILE: {
+        const profile = await this.auth.getProfile(caller.ucode, caller.br_code);
+        return rawEnvelope({ stat: 0, msg: 'OK', data: profile });
+      }
       case AUTH_API_ACTION.AUTH_CHANGE_PASS: {
         const result = await this.auth.changePassword(caller.ucode, body.content as ChangePasswordPayload);
         return rawEnvelope({ stat: 0, msg: result.msg });
