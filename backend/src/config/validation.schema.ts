@@ -21,6 +21,9 @@ const schema = z.object({
   MAIL_USER: z.string().optional(),
   MAIL_PASS: z.string().optional(),
   MAIL_USE_SSL: z.string().optional(),
+  MAIL_APP_NAME: z.string().optional(),
+  MAIL_APP_URL: z.string().optional(),
+  MAIL_SUPPORT_EMAIL: z.string().optional(),
   LOG_LEVEL: z.string().optional(),
 });
 
