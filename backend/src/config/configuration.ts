@@ -26,6 +26,9 @@ export interface AppConfig {
     user: string;
     pass: string;
     useSsl: boolean;
+    appName: string;
+    appUrl: string;
+    supportEmail: string;
   };
   log: {
     level: string;
@@ -88,6 +91,9 @@ export const configuration = (): AppConfig => ({
     user: process.env.MAIL_USER ?? '',
     pass: process.env.MAIL_PASS ?? '',
     useSsl: toBool(process.env.MAIL_USE_SSL, true),
+    appName: process.env.MAIL_APP_NAME ?? 'ShepherdSoft',
+    appUrl: process.env.MAIL_APP_URL ?? '',
+    supportEmail: process.env.MAIL_SUPPORT_EMAIL ?? (process.env.MAIL_FROM ?? ''),
   },
   log: {
     level: process.env.LOG_LEVEL ?? 'info',
