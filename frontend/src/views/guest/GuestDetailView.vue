@@ -10,6 +10,7 @@ import BaseButton from '@/components/ui/BaseButton.vue';
 import DataTable from '@/components/ui/DataTable.vue';
 import { guestApi } from '@/api/guest';
 import { useToast } from '@/composables/useToast';
+import { formatDateOnly } from '@/lib/dates';
 import { useAuthStore } from '@/stores/auth';
 import { ArrowUpCircleIcon, CalendarDaysIcon, TrashIcon } from '@heroicons/vue/24/outline';
 
@@ -143,7 +144,7 @@ const followUpColumns = [
         <dl class="grid grid-cols-2 gap-2 text-sm">
           <dt class="text-slate-500">
             Visit date
-          </dt><dd>{{ guest.vdt }}</dd>
+          </dt><dd>{{ formatDateOnly(guest.vdt) }}</dd>
           <dt class="text-slate-500">
             Visit type
           </dt><dd>{{ guest.vtype === 1 ? 'One-time' : 'Joining' }}</dd>
@@ -180,7 +181,11 @@ const followUpColumns = [
         :columns="followUpColumns"
         :loading="loading"
         empty-text="No follow-ups yet."
-      />
+      >
+        <template #fdt="{ value }">
+          {{ formatDateOnly(value as string) }}
+        </template>
+      </DataTable>
     </div>
 
     <FollowUpAddDialog

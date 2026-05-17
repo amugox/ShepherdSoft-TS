@@ -5,6 +5,7 @@ import type { Member } from '@shepherd/shared';
 
 import { memberApi } from '@/api/member';
 import { useToast } from '@/composables/useToast';
+import { formatDateOnly } from '@/lib/dates';
 
 const props   = defineProps<{ code: string }>();
 const toast   = useToast();
@@ -41,7 +42,7 @@ watch(() => props.code, load);
       <div><span class="text-slate-500">Address:</span> {{ member.padd ?? '—' }}</div>
       <div><span class="text-slate-500">Group:</span> {{ member.grpn ?? '—' }}</div>
       <div><span class="text-slate-500">Branch:</span> {{ member.br_name ?? '—' }}</div>
-      <div><span class="text-slate-500">Join date:</span> {{ member.jdt ?? '—' }}</div>
+      <div><span class="text-slate-500">Join date:</span> {{ member.jdt ? formatDateOnly(member.jdt) : '—' }}</div>
     </div>
     <p
       v-else-if="loading"

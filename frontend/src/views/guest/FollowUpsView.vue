@@ -9,6 +9,7 @@ import BaseButton from '@/components/ui/BaseButton.vue';
 import DataTable from '@/components/ui/DataTable.vue';
 import { guestApi } from '@/api/guest';
 import { useToast } from '@/composables/useToast';
+import { formatDateOnly } from '@/lib/dates';
 import { useGuestStore } from '@/stores/guest';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/vue/24/outline';
 
@@ -75,6 +76,9 @@ const columns = [
       :columns="columns"
       empty-text="No pending follow-ups."
     >
+      <template #fdt="{ value }">
+        {{ formatDateOnly(value as string) }}
+      </template>
       <template #fname="{ row }">
         <button
           class="font-medium text-brand-700 hover:underline"

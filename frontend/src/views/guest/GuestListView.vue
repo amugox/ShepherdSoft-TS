@@ -8,6 +8,7 @@ import type { Guest, GuestFilter } from '@shepherd/shared';
 import GuestFilters from '@/components/domain/guest/GuestFilters.vue';
 import DataTable from '@/components/ui/DataTable.vue';
 import { useToast } from '@/composables/useToast';
+import { formatDateOnly } from '@/lib/dates';
 import { useGuestStore } from '@/stores/guest';
 
 const guest  = useGuestStore();
@@ -67,6 +68,9 @@ const openGuest = (row: Guest): void => {
       empty-text="No guests match the current filter."
       @row-click="openGuest"
     >
+      <template #vdt="{ value }">
+        {{ formatDateOnly(value as string) }}
+      </template>
       <template #fname="{ row }">
         <span class="font-medium text-slate-900">
           {{ row.fname }} {{ row.onames ?? '' }}
