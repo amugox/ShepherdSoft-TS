@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { UserCircleIcon, ArrowLeftOnRectangleIcon } from '@heroicons/vue/24/outline';
 
 import { useAuthStore } from '@/stores/auth';
 
@@ -42,15 +43,17 @@ const goProfile = (): Promise<unknown> => router.push('/profile');
           </summary>
           <div class="absolute right-0 z-30 mt-1 w-48 rounded-md border border-slate-200 bg-white shadow-lg">
             <button
-              class="block w-full px-4 py-2 text-left text-sm hover:bg-slate-50"
+              class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-slate-50"
               @click="goProfile"
             >
+              <UserCircleIcon class="h-4 w-4 shrink-0 text-slate-500" />
               My Profile
             </button>
             <button
-              class="block w-full px-4 py-2 text-left text-sm text-rose-600 hover:bg-rose-50"
+              class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-rose-600 hover:bg-rose-50"
               @click="logout"
             >
+              <ArrowLeftOnRectangleIcon class="h-4 w-4 shrink-0" />
               Sign out
             </button>
           </div>

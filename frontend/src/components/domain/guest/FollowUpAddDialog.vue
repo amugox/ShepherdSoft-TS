@@ -9,6 +9,7 @@ import BaseModal from '@/components/ui/BaseModal.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
 import BaseTextarea from '@/components/ui/BaseTextarea.vue';
 import { todayLocal } from '@/lib/dates';
+import { XMarkIcon, CalendarDaysIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps<{
   open: boolean;
@@ -78,11 +79,13 @@ const typeOptions = [
     <template #footer>
       <BaseButton
         variant="secondary"
+        :icon="XMarkIcon"
         @click="emit('close')"
       >
         Cancel
       </BaseButton>
       <BaseButton
+        :icon="CalendarDaysIcon"
         :loading="submitting"
         @click="emit('submit', { ...form })"
       >

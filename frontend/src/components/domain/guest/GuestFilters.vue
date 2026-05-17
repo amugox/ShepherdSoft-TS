@@ -10,6 +10,7 @@ import {
 
 import BaseInput from '@/components/ui/BaseInput.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
+import { FunnelIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps<{
   modelValue: GuestFilter;
@@ -69,6 +70,7 @@ const fuStatusOptions = [
         class="btn-primary w-full"
         type="submit"
       >
+        <FunnelIcon class="h-4 w-4 shrink-0" />
         Filter
       </button>
     </div>

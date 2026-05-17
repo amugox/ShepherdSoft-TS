@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { UserPlusIcon } from '@heroicons/vue/24/outline';
 
 import type { Guest, GuestFilter } from '@shepherd/shared';
 
@@ -49,7 +50,8 @@ const openGuest = (row: Guest): void => {
         to="/guest/register"
         class="btn-primary"
       >
-        + Register guest
+        <UserPlusIcon class="h-4 w-4 shrink-0" />
+        Register guest
       </RouterLink>
     </header>
 

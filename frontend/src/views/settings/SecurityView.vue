@@ -5,6 +5,7 @@ import BaseButton from '@/components/ui/BaseButton.vue';
 import { useToast } from '@/composables/useToast';
 import { authApi } from '@/api/auth';
 import { useAuthStore } from '@/stores/auth';
+import { ShieldCheckIcon } from '@heroicons/vue/24/outline';
 
 const toast = useToast();
 const auth = useAuthStore();
@@ -86,6 +87,7 @@ onMounted(async () => {
 
       <div class="mt-4 flex justify-end">
         <BaseButton
+          :icon="ShieldCheckIcon"
           :disabled="loading || saving || !loaded || !isAdmin"
           :loading="saving"
           @click="save"

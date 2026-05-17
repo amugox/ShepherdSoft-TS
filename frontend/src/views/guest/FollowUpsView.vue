@@ -10,6 +10,7 @@ import DataTable from '@/components/ui/DataTable.vue';
 import { guestApi } from '@/api/guest';
 import { useToast } from '@/composables/useToast';
 import { useGuestStore } from '@/stores/guest';
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/vue/24/outline';
 
 const guestStore = useGuestStore();
 const toast      = useToast();
@@ -86,12 +87,14 @@ const columns = [
         <div class="flex justify-end gap-1">
           <BaseButton
             variant="secondary"
+            :icon="CheckCircleIcon"
             @click.stop="completing = row"
           >
             Complete
           </BaseButton>
           <BaseButton
             variant="danger"
+            :icon="XCircleIcon"
             @click.stop="cancel(row)"
           >
             Cancel

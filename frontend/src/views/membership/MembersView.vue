@@ -12,6 +12,7 @@ import DataTable from '@/components/ui/DataTable.vue';
 import { memberApi } from '@/api/member';
 import { useToast } from '@/composables/useToast';
 import { useMemberStore } from '@/stores/member';
+import { UserPlusIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
 
 const memberStore = useMemberStore();
 const toast       = useToast();
@@ -65,8 +66,11 @@ const open = (m: Member): void => {
           Registered members across your branch.
         </p>
       </div>
-      <BaseButton @click="addOpen = true">
-        + Add member
+      <BaseButton
+        :icon="UserPlusIcon"
+        @click="addOpen = true"
+      >
+        Add member
       </BaseButton>
     </header>
 
@@ -83,6 +87,7 @@ const open = (m: Member): void => {
       <BaseButton
         variant="secondary"
         type="submit"
+        :icon="MagnifyingGlassIcon"
       >
         Search
       </BaseButton>

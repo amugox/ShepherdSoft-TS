@@ -16,6 +16,7 @@ import BaseSelect from '@/components/ui/BaseSelect.vue';
 import BaseTextarea from '@/components/ui/BaseTextarea.vue';
 import { todayLocal } from '@/lib/dates';
 import { useReferenceStore } from '@/stores/reference';
+import { XMarkIcon, CheckIcon } from '@heroicons/vue/24/outline';
 
 const emit = defineEmits<{
   (e: 'submit', guest: Guest): void;
@@ -233,12 +234,14 @@ const heardViaOptions = [
       <BaseButton
         variant="secondary"
         type="button"
+        :icon="XMarkIcon"
         @click="emit('cancel')"
       >
         Cancel
       </BaseButton>
       <BaseButton
         type="submit"
+        :icon="CheckIcon"
         :loading="submitting"
       >
         Save guest

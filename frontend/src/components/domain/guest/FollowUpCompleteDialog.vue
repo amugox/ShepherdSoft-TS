@@ -6,6 +6,7 @@ import type { GuestFollowUpCompletePayload } from '@shepherd/shared';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseModal from '@/components/ui/BaseModal.vue';
 import BaseTextarea from '@/components/ui/BaseTextarea.vue';
+import { XMarkIcon, CheckCircleIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps<{
   open: boolean;
@@ -54,11 +55,13 @@ watch(() => props.followUpCode, (v) => { form.code = v; });
     <template #footer>
       <BaseButton
         variant="secondary"
+        :icon="XMarkIcon"
         @click="emit('close')"
       >
         Cancel
       </BaseButton>
       <BaseButton
+        :icon="CheckCircleIcon"
         :loading="submitting"
         @click="emit('submit', { ...form })"
       >

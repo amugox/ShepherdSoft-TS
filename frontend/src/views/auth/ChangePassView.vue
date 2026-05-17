@@ -6,6 +6,7 @@ import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseInput from '@/components/ui/BaseInput.vue';
 import { useToast } from '@/composables/useToast';
 import { useAuthStore } from '@/stores/auth';
+import { KeyIcon } from '@heroicons/vue/24/outline';
 
 const auth = useAuthStore();
 const router = useRouter();
@@ -73,6 +74,7 @@ const onSubmit = async (): Promise<void> => {
     />
     <BaseButton
       type="submit"
+      :icon="KeyIcon"
       :loading="submitting"
     >
       Update password
