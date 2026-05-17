@@ -22,37 +22,37 @@ describe('globalAuthGuard', () => {
 
   it('redirects unauthenticated users to login', () => {
     mockAuth.isAuthenticated = false;
-    const result = globalAuthGuard({
+    const result = globalAuthGuard.call(undefined, {
       fullPath: '/admin/users',
       meta: { requiresAuth: true },
-    } as never);
+    } as never, {} as never, {} as never);
     expect(result).toEqual({ path: '/auth/login', query: { return: '/admin/users' } });
   });
 
   it('blocks non-admin users from admin routes', () => {
     mockAuth.user = { role: 'Viewer' };
-    const result = globalAuthGuard({
+    const result = globalAuthGuard.call(undefined, {
       fullPath: '/admin/users',
       meta: { requiresAuth: true, requiresAdmin: true },
-    } as never);
+    } as never, {} as never, {} as never);
     expect(result).toEqual({ path: '/' });
   });
 
   it('blocks admin users from super-admin-only routes', () => {
     mockAuth.user = { role: 'Admin' };
-    const result = globalAuthGuard({
+    const result = globalAuthGuard.call(undefined, {
       fullPath: '/admin/branches',
       meta: { requiresAuth: true, requiresSuperAdmin: true },
-    } as never);
+    } as never, {} as never, {} as never);
     expect(result).toEqual({ path: '/' });
   });
 
   it('allows super-admin-only routes for super admin', () => {
     mockAuth.user = { role: 'Super Admin' };
-    const result = globalAuthGuard({
+    const result = globalAuthGuard.call(undefined, {
       fullPath: '/admin/branches',
       meta: { requiresAuth: true, requiresSuperAdmin: true },
-    } as never);
+    } as never, {} as never, {} as never);
     expect(result).toBe(true);
   });
 });

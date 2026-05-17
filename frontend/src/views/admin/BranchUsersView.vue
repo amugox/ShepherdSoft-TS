@@ -29,8 +29,8 @@ const branches = ref<BranchAdminRecord[]>([]);
 
 const filters = ref({
   searchText: '',
-  branchCode: null as number | null,
-  roleCode: null as number | null,
+  branchCode: 0,
+  roleCode: 0,
   includeInactive: true,
 });
 
@@ -72,8 +72,8 @@ const load = async (): Promise<void> => {
   try {
     users.value = (await adminApi.listBranchUsers({
       searchText: filters.value.searchText.trim(),
-      branchCode: filters.value.branchCode ?? undefined,
-      roleCode: filters.value.roleCode ?? undefined,
+      branchCode: filters.value.branchCode > 0 ? filters.value.branchCode : undefined,
+      roleCode: filters.value.roleCode > 0 ? filters.value.roleCode : undefined,
       includeInactive: filters.value.includeInactive,
     })) ?? [];
   } catch (err) {
@@ -234,12 +234,12 @@ onMounted(async () => {
         v-model="filters.branchCode"
         label="Branch"
         :disabled="!isSuperAdmin"
-        :options="[{ value: null, label: 'All branches' }, ...branchOptions]"
+        :options="[{ value: 0, label: 'All branches' }, ...branchOptions]"
       />
       <BaseSelect
         v-model="filters.roleCode"
         label="Role"
-        :options="[{ value: null, label: 'All roles' }, ...roleOptions]"
+        :options="[{ value: 0, label: 'All roles' }, ...roleOptions]"
       />
       <div class="flex items-end">
         <BaseButton
