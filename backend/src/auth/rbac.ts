@@ -7,6 +7,9 @@ export const Permission = {
   UserWrite: 'user:write',
   UserDeactivate: 'user:deactivate',
   UserReset: 'user:reset',
+  BranchRead: 'branch:read',
+  BranchWrite: 'branch:write',
+  BranchDeactivate: 'branch:deactivate',
   SecurityManage: 'security:manage',
 } as const;
 
@@ -18,6 +21,9 @@ const rolePermissions: Record<number, Permission[]> = {
     Permission.UserWrite,
     Permission.UserDeactivate,
     Permission.UserReset,
+    Permission.BranchRead,
+    Permission.BranchWrite,
+    Permission.BranchDeactivate,
     Permission.SecurityManage,
   ],
   [UserRoleCode.Admin]: [
@@ -25,6 +31,7 @@ const rolePermissions: Record<number, Permission[]> = {
     Permission.UserWrite,
     Permission.UserDeactivate,
     Permission.UserReset,
+    Permission.BranchRead,
     Permission.SecurityManage,
   ],
   [UserRoleCode.Standard]: [Permission.UserRead],

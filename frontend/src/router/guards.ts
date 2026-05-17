@@ -1,5 +1,6 @@
 import type { NavigationGuardWithThis, RouteLocationNormalized } from 'vue-router';
 
+import { isAdminRole, isSuperAdminRole } from '@/lib/roles';
 import { useAuthStore } from '@/stores/auth';
 
 declare module 'vue-router' {
@@ -10,6 +11,8 @@ declare module 'vue-router' {
     publicOnly?: boolean;
     /** Restrict route to admin/super-admin users. */
     requiresAdmin?: boolean;
+    /** Restrict route to super-admin users only. */
+    requiresSuperAdmin?: boolean;
   }
 }
 
@@ -28,9 +31,10 @@ export const globalAuthGuard: NavigationGuardWithThis<undefined> = (
     return { path: '/auth/login', query: { return: to.fullPath } };
   }
   if (to.meta.requiresAdmin) {
-    const normalized = (auth.user?.role ?? '').trim().toLowerCase();
-    const isAdmin = normalized.includes('admin') || normalized === '0' || normalized === '1';
-    if (!isAdmin) return { path: '/' };
+    if (!isAdminRole(auth.user?.role)) return { path: '/' };
+  }
+  if (to.meta.requiresSuperAdmin) {
+    if (!isSuperAdminRole(auth.user?.role)) return { path: '/' };
   }
   return true;
 };

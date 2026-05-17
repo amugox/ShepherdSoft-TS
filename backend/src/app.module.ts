@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
+import { AdminModule } from './admin/admin.module';
 import { AuthModule } from './auth/auth.module';
 import { CsrfGuard } from './common/guards/csrf.guard';
 import { configuration } from './config/configuration';
@@ -30,6 +31,7 @@ import { UserModule } from './user/user.module';
     PrismaModule,
     MailModule,
     AuthModule,
+    AdminModule,
     DataModule,
     GuestModule,
     MemberModule,

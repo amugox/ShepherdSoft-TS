@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 
 import BaseButton from '@/components/ui/BaseButton.vue';
 import { useToast } from '@/composables/useToast';
+import { isAdminRole } from '@/lib/roles';
 import { authApi } from '@/api/auth';
 import { useAuthStore } from '@/stores/auth';
 import { ShieldCheckIcon } from '@heroicons/vue/24/outline';
@@ -15,7 +16,7 @@ const saving = ref(false);
 const enabled = ref(false);
 const loaded = ref(false);
 
-const isAdmin = computed(() => (auth.user?.role ?? '').toLowerCase().includes('admin'));
+const isAdmin = computed(() => isAdminRole(auth.user?.role));
 
 const loadState = async (): Promise<void> => {
   loading.value = true;

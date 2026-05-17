@@ -60,3 +60,24 @@ export const USER_API_ACTION = {
 } as const;
 
 export type UserApiAction = (typeof USER_API_ACTION)[keyof typeof USER_API_ACTION];
+
+/** Admin-area action codes routed via /admin/service. */
+export const ADMIN_API_ACTION = {
+  // Branches
+  ADMIN_BRANCH_LIST: 500,
+  ADMIN_BRANCH_GET: 501,
+  ADMIN_BRANCH_CREATE: 502,
+  ADMIN_BRANCH_UPDATE: 503,
+  ADMIN_BRANCH_DEACTIVATE: 504,
+
+  // Branch users
+  ADMIN_BRANCH_USER_LIST: 520,
+  ADMIN_BRANCH_USER_GET: 521,
+  ADMIN_BRANCH_USER_CREATE: 522,
+  ADMIN_BRANCH_USER_UPDATE: 523,
+  ADMIN_BRANCH_USER_DEACTIVATE: 524,
+  ADMIN_BRANCH_USER_RESET_PASSWORD_REQUEST: 525,
+  ADMIN_BRANCH_USER_ROLES_LIST: 526,
+} as const;
+
+export type AdminApiAction = (typeof ADMIN_API_ACTION)[keyof typeof ADMIN_API_ACTION];
