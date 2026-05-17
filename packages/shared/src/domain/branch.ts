@@ -51,3 +51,32 @@ export interface SearchPayload {
   code?: number;
   stxt?: string;
 }
+
+export interface BranchAdminRecord {
+  br_code: number;
+  br_name: string;
+  stat: number;
+  users_count?: number;
+}
+
+export interface BranchAdminListPayload {
+  includeInactive?: boolean;
+}
+
+export interface BranchAdminGetPayload {
+  br_code: number;
+}
+
+export interface BranchAdminCreatePayload {
+  br_name: string;
+}
+
+export interface BranchAdminUpdatePayload {
+  br_code: number;
+  br_name?: string;
+  stat?: number;
+}
+
+export interface BranchAdminDeactivatePayload {
+  br_code: number;
+}

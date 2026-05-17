@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 
 import BrandLogo from '@/components/brand/BrandLogo.vue';
+import { isAdminRole } from '@/lib/roles';
 import { useAuthStore } from '@/stores/auth';
 
 interface NavLinkItem {
@@ -61,14 +62,11 @@ const baseItems: NavItem[] = [
 const auth = useAuthStore();
 const route = useRoute();
 const openGroups = ref<Record<string, boolean>>({});
-const isAdmin = computed(() => (auth.user?.role ?? '').toLowerCase().includes('admin'));
+const isAdmin = computed(() => isAdminRole(auth.user?.role));
 const items = computed<NavItem[]>(() => [
   ...baseItems,
   ...(isAdmin.value
-    ? [
-      { type: 'link', to: '/settings/users', label: 'Users', icon: '🧑‍💼' } satisfies NavLinkItem,
-      { type: 'link', to: '/settings/security', label: 'Security', icon: '🔐' } satisfies NavLinkItem,
-    ]
+    ? [{ type: 'link', to: '/admin', label: 'Admin', icon: '🛠️' } satisfies NavLinkItem]
     : []),
 ]);
 

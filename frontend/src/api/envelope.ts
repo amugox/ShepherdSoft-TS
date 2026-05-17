@@ -5,7 +5,7 @@ import { API_STATUS } from '@shepherd/shared';
 
 import { client } from './client';
 
-export type Area = 'auth' | 'data' | 'guest' | 'member' | 'messaging' | 'user';
+export type Area = 'auth' | 'data' | 'guest' | 'member' | 'messaging' | 'user' | 'admin';
 
 export class ApiError extends Error {
   constructor(

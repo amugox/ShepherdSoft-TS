@@ -89,12 +89,14 @@ export interface UserRoleItem {
 export interface UserAdminRecord {
   user_code: number;
   br_code: number;
+  br_name?: string | null;
   user_name: string;
   member_code: number;
   email?: string | null;
   full_name?: string | null;
   user_stat: number;
   user_role: number;
+  role_name?: string | null;
   change_pwd?: boolean | null;
   last_login?: string | null;
   reg_date?: string | null;
@@ -102,6 +104,9 @@ export interface UserAdminRecord {
 
 export interface UserAdminListPayload {
   searchText?: string;
+  branchCode?: number;
+  roleCode?: number;
+  includeInactive?: boolean;
 }
 
 export interface UserAdminGetPayload {
@@ -109,6 +114,7 @@ export interface UserAdminGetPayload {
 }
 
 export interface UserAdminCreatePayload {
+  br_code?: number;
   user_name: string;
   member_code: number;
   email: string;
@@ -118,6 +124,7 @@ export interface UserAdminCreatePayload {
 
 export interface UserAdminUpdatePayload {
   user_code: number;
+  br_code?: number;
   member_code?: number;
   email?: string;
   user_role?: number;
