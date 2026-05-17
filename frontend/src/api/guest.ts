@@ -5,6 +5,8 @@ import {
   type GuestFollowUp,
   type GuestFollowUpCompletePayload,
   type GuestFollowUpPayload,
+  type GuestFollowUpReschedulePayload,
+  type GuestPagedResult,
   type GuestPromotePayload,
   type GuestStats,
 } from '@shepherd/shared';
@@ -12,13 +14,16 @@ import {
 import { call } from './envelope';
 
 export const guestApi = {
-  find: (filter: GuestFilter): Promise<Guest[] | undefined> =>
-    call<Guest[]>('guest', HTTP_API_ACTION.GUEST_FIND, filter),
+  find: (filter: GuestFilter): Promise<GuestPagedResult | undefined> =>
+    call<GuestPagedResult>('guest', HTTP_API_ACTION.GUEST_FIND, filter),
 
   get: (code: number): Promise<Guest | undefined> =>
     call<Guest>('guest', HTTP_API_ACTION.GUEST_GET, { code }),
 
   add: (guest: Guest): Promise<unknown> => call('guest', HTTP_API_ACTION.GUEST_ADD, guest),
+
+  update: (code: number, guest: Guest): Promise<unknown> =>
+    call('guest', HTTP_API_ACTION.GUEST_UPDATE, { ...guest, code }),
 
   stats: (): Promise<GuestStats | undefined> =>
     call<GuestStats>('guest', HTTP_API_ACTION.GUEST_GET_STATS),
@@ -40,4 +45,7 @@ export const guestApi = {
 
   cancelFollowUp: (code: number): Promise<unknown> =>
     call('guest', HTTP_API_ACTION.GUEST_FOLLOWUP_CANCEL, { code }),
+
+  rescheduleFollowUp: (payload: GuestFollowUpReschedulePayload): Promise<unknown> =>
+    call('guest', HTTP_API_ACTION.GUEST_FOLLOWUP_RESCHEDULE, payload),
 };

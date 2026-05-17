@@ -71,6 +71,25 @@ export class FollowUpSp {
     return normRow<SpRow>(row);
   }
 
+  /** Reschedule a pending follow-up to a new date, with optional reassignment. */
+  async rescheduleFollowUp(
+    code: number,
+    newDate: string,
+    assignedTo?: number,
+  ): Promise<boolean> {
+    const data: { followup_date: Date; assigned_to?: number } = {
+      followup_date: new Date(newDate),
+    };
+    if (assignedTo !== undefined && assignedTo > 0) {
+      data.assigned_to = assignedTo;
+    }
+    const result = await this.prisma.guest_follow_ups.updateMany({
+      where: { followup_code: code, followup_status: 0 },
+      data,
+    });
+    return result.count > 0;
+  }
+
   async findByGuest(guestCode: number): Promise<GuestFollowUp[]> {
     const rows = await this.prisma.$queryRawUnsafe(
       `${FU_SELECT} WHERE guest_code = ? ORDER BY followup_date DESC, followup_code DESC`,
@@ -79,11 +98,17 @@ export class FollowUpSp {
     return normRows<GuestFollowUp>(rows) as GuestFollowUp[];
   }
 
-  async findPending(): Promise<GuestFollowUp[]> {
+  async findPending(branchCode?: number): Promise<GuestFollowUp[]> {
     const rows = await this.prisma.$queryRawUnsafe(
-      `${FU_SELECT} WHERE followup_status = 0
+      `${FU_SELECT}
+       WHERE followup_status = 0
+         AND (? IS NULL OR guest_code IN (
+           SELECT guest_code FROM guests WHERE br_code = ?
+         ))
        ORDER BY followup_date ASC, followup_code ASC
        LIMIT 200`,
+      branchCode ?? null,
+      branchCode ?? null,
     ) as unknown[];
     return normRows<GuestFollowUp>(rows) as GuestFollowUp[];
   }

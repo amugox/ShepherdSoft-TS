@@ -1,25 +1,25 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from 'vue';
 
-import { FollowUpType, type GuestFollowUpPayload } from '@shepherd/shared';
+import type { GuestFollowUpReschedulePayload } from '@shepherd/shared';
 
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseInput from '@/components/ui/BaseInput.vue';
 import BaseModal from '@/components/ui/BaseModal.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
-import BaseTextarea from '@/components/ui/BaseTextarea.vue';
 import { todayLocal } from '@/lib/dates';
 import { userApi } from '@/api/user';
 import { XMarkIcon, CalendarDaysIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps<{
   open: boolean;
-  guestCode: number;
-  defaultAssignedTo?: number;
+  followUpCode: number;
+  currentDate?: string;
+  currentAssignedTo?: number;
   submitting?: boolean;
 }>();
 const emit = defineEmits<{
-  (e: 'submit', payload: GuestFollowUpPayload): void;
+  (e: 'submit', payload: GuestFollowUpReschedulePayload): void;
   (e: 'close'): void;
 }>();
 
@@ -32,70 +32,54 @@ onMounted(async () => {
       .filter((u) => u.user_stat === 0)
       .map((u) => ({ value: u.user_code, label: u.full_name ?? u.user_name }));
   } catch {
-    // Gracefully degrade — the select will be empty; user can still proceed.
+    // Gracefully degrade.
   }
 });
 
-const initial = (): GuestFollowUpPayload => ({
-  g_code: props.guestCode,
-  ftype: FollowUpType.Call,
-  fdt: todayLocal(),
-  notes: '',
-  assigned_to: props.defaultAssignedTo ?? 0,
+const initial = (): { code: number; fdt: string; assigned_to?: number | null } => ({
+  code:        props.followUpCode,
+  fdt:         props.currentDate ?? todayLocal(),
+  assigned_to: props.currentAssignedTo ?? null,
 });
 
-const form = reactive<GuestFollowUpPayload>(initial());
-watch(() => props.guestCode, (v) => { form.g_code = v; });
-watch(() => props.defaultAssignedTo, (v) => { form.assigned_to = v ?? 0; });
+const form = reactive<{ code: number; fdt: string; assigned_to?: number | null }>(initial());
 
-const typeOptions = [
-  { value: FollowUpType.Call,  label: 'Phone call' },
-  { value: FollowUpType.Sms,   label: 'SMS' },
-  { value: FollowUpType.Visit, label: 'Visit' },
-];
+watch(() => props.followUpCode,     (v) => { form.code = v; });
+watch(() => props.currentDate,      (v) => { form.fdt = v ?? todayLocal(); });
+watch(() => props.currentAssignedTo, (v) => { form.assigned_to = v ?? null; });
+
+const submit = (): void => {
+  const payload: GuestFollowUpReschedulePayload = {
+    code:        form.code,
+    fdt:         form.fdt,
+    assigned_to: form.assigned_to ?? undefined,
+  };
+  emit('submit', payload);
+};
 </script>
 
 <template>
   <BaseModal
     :open="open"
-    title="Schedule follow-up"
-    size="md"
+    title="Reschedule follow-up"
+    size="sm"
     @close="emit('close')"
   >
     <form
       class="space-y-3"
-      @submit.prevent="emit('submit', { ...form })"
+      @submit.prevent="submit"
     >
-      <BaseSelect
-        v-model="form.ftype"
-        label="Type"
-        required
-        :options="typeOptions"
-      />
       <BaseInput
         v-model="form.fdt"
         type="date"
-        label="Date"
+        label="New date"
         required
       />
       <BaseSelect
         v-if="userOptions.length > 0"
         v-model="form.assigned_to"
-        label="Assign to"
-        required
+        label="Reassign to (optional)"
         :options="userOptions"
-      />
-      <BaseInput
-        v-else
-        v-model.number="form.assigned_to"
-        type="number"
-        label="Assigned to (user code)"
-        required
-      />
-      <BaseTextarea
-        v-model="form.notes"
-        label="Notes"
-        :rows="3"
       />
     </form>
     <template #footer>
@@ -109,9 +93,9 @@ const typeOptions = [
       <BaseButton
         :icon="CalendarDaysIcon"
         :loading="submitting"
-        @click="emit('submit', { ...form })"
+        @click="submit"
       >
-        Schedule
+        Reschedule
       </BaseButton>
     </template>
   </BaseModal>
