@@ -10,6 +10,7 @@ describe('GuestService branch isolation', () => {
   let service: GuestService;
   let guests: jest.Mocked<Pick<GuestSp, 'findGuests' | 'getGuest' | 'createGuest' | 'promoteToMember' | 'getStats' | 'deleteGuest'>>;
   let followups: jest.Mocked<Pick<FollowUpSp, 'addFollowUp' | 'findByGuest' | 'findPending' | 'completeFollowUp' | 'cancelFollowUp'>>;
+  type GuestRequest = Parameters<GuestService['handle']>[0];
 
   beforeEach(() => {
     guests = {
@@ -35,7 +36,7 @@ describe('GuestService branch isolation', () => {
       act: HTTP_API_ACTION.GUEST_FIND,
       content: { stxt: 'john' },
       caller: { br_code: 10, url: 'Admin' },
-    } as any);
+    } as unknown as GuestRequest);
 
     expect(guests.findGuests).toHaveBeenCalledWith({ stxt: 'john' }, 10);
   });
@@ -45,7 +46,7 @@ describe('GuestService branch isolation', () => {
       act: HTTP_API_ACTION.GUEST_FIND,
       content: { stxt: 'john' },
       caller: { br_code: 10, url: 'Super Admin' },
-    } as any);
+    } as unknown as GuestRequest);
 
     expect(guests.findGuests).toHaveBeenCalledWith({ stxt: 'john' }, undefined);
   });
@@ -56,7 +57,7 @@ describe('GuestService branch isolation', () => {
         act: HTTP_API_ACTION.GUEST_GET,
         content: { code: 1 },
         caller: { br_code: 0, url: 'Admin' },
-      } as any),
+      } as unknown as GuestRequest),
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 });

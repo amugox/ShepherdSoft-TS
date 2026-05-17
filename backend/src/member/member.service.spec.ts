@@ -8,6 +8,7 @@ import { MemberService } from './member.service';
 describe('MemberService branch isolation', () => {
   let service: MemberService;
   let sp: jest.Mocked<Pick<MemberSp, 'findMembers' | 'getMember' | 'createMember' | 'createFamily' | 'getFamily' | 'findFamilies'>>;
+  type MemberRequest = Parameters<MemberService['handle']>[0];
 
   beforeEach(() => {
     sp = {
@@ -26,7 +27,7 @@ describe('MemberService branch isolation', () => {
       act: HTTP_API_ACTION.MEMBER_FIND,
       content: { stxt: 'john' },
       caller: { br_code: 10, url: 'Admin' },
-    } as any);
+    } as unknown as MemberRequest);
 
     expect(sp.findMembers).toHaveBeenCalledWith('john', 10);
   });
@@ -36,7 +37,7 @@ describe('MemberService branch isolation', () => {
       act: HTTP_API_ACTION.MEMBER_FAM_FIND,
       content: { stxt: 'fam' },
       caller: { br_code: 22, url: 'Admin' },
-    } as any);
+    } as unknown as MemberRequest);
 
     expect(sp.findFamilies).toHaveBeenCalledWith('fam', 22);
   });
@@ -46,7 +47,7 @@ describe('MemberService branch isolation', () => {
       act: HTTP_API_ACTION.MEMBER_GET,
       content: { code: 9 },
       caller: { br_code: 10, url: 'Super Admin' },
-    } as any);
+    } as unknown as MemberRequest);
 
     expect(sp.getMember).toHaveBeenCalledWith(9, undefined);
   });
@@ -57,7 +58,7 @@ describe('MemberService branch isolation', () => {
         act: HTTP_API_ACTION.MEMBER_FAM_GET,
         content: { code: 3 },
         caller: { br_code: 0, url: 'Admin' },
-      } as any),
+      } as unknown as MemberRequest),
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 });
