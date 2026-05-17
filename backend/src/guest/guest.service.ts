@@ -27,8 +27,8 @@ export class GuestService {
 
   handle(req: ApiRequestDto): Promise<unknown> {
     const handlers: ActionMap = {
-      [HTTP_API_ACTION.GUEST_FIND]: (r) => this.find(r.content as GuestFilter),
-      [HTTP_API_ACTION.GUEST_GET]: (r) => this.get(r.content as SearchPayload),
+      [HTTP_API_ACTION.GUEST_FIND]: (r) => this.find(r.content as GuestFilter, r.caller),
+      [HTTP_API_ACTION.GUEST_GET]: (r) => this.get(r.content as SearchPayload, r.caller),
       [HTTP_API_ACTION.GUEST_ADD]: (r) => this.add(r.content as Guest, r.caller),
       [HTTP_API_ACTION.GUEST_FOLLOWUP_ADD]: (r) => this.addFollowUp(r.content as GuestFollowUpPayload),
       [HTTP_API_ACTION.GUEST_FOLLOWUP_FIND]: (r) => this.findFollowUps(r.content as SearchPayload),
@@ -42,13 +42,15 @@ export class GuestService {
     return dispatch(req, handlers);
   }
 
-  private async find(filter?: GuestFilter): Promise<unknown> {
-    return this.guests.findGuests(filter ?? {});
+  private async find(filter?: GuestFilter, caller?: RequestHeaderDto | null): Promise<unknown> {
+    const branchCode = this.readBranchScope(caller);
+    return this.guests.findGuests(filter ?? {}, branchCode);
   }
 
-  private async get(p?: SearchPayload): Promise<unknown> {
+  private async get(p?: SearchPayload, caller?: RequestHeaderDto | null): Promise<unknown> {
     if (!p?.code) throw new BadRequestException('Missing guest code.');
-    return this.guests.getGuest(p.code);
+    const branchCode = this.readBranchScope(caller);
+    return this.guests.getGuest(p.code, branchCode);
   }
 
   private async add(g?: Guest, caller?: RequestHeaderDto | null): Promise<unknown> {
@@ -117,5 +119,17 @@ export class GuestService {
       return rawEnvelope({ stat: 1, msg: row?.resp_message ?? 'Failed to delete guest.' });
     }
     return rawEnvelope({ stat: 0, msg: row.resp_message });
+  }
+
+  private readBranchScope(caller?: RequestHeaderDto | null): number | undefined {
+    if (this.isSuperAdmin(caller?.url)) return undefined;
+    const branchCode = caller?.br_code ?? 0;
+    if (!branchCode) throw new BadRequestException('Missing caller branch code.');
+    return branchCode;
+  }
+
+  private isSuperAdmin(role: string | undefined): boolean {
+    const normalized = (role ?? '').trim().toLowerCase();
+    return normalized === '0' || normalized.includes('super');
   }
 }

@@ -35,12 +35,13 @@ const MEMBER_SELECT = `
 
 const FAM_SELECT = `
   SELECT
-    fam_code         AS code,
-    member_code      AS mcode,
-    fam_name         AS fname,
-    member_name      AS mname,
-    member_comm_name AS cname
-  FROM vw_fams
+    f.fam_code         AS code,
+    f.member_code      AS mcode,
+    f.fam_name         AS fname,
+    f.member_name      AS mname,
+    f.member_comm_name AS cname
+  FROM vw_fams f
+  LEFT JOIN vw_members m ON m.member_code = f.member_code
 `;
 
 @Injectable()
@@ -78,45 +79,53 @@ export class MemberSp {
     return normRow<SpRow>(row);
   }
 
-  async getMember(code: number): Promise<Member | null> {
+  async getMember(code: number, branchCode?: number): Promise<Member | null> {
     const rows = await this.prisma.$queryRawUnsafe(
-      `${MEMBER_SELECT} WHERE member_code = ? LIMIT 1`,
+      `${MEMBER_SELECT} WHERE member_code = ? ${typeof branchCode === 'number' ? 'AND br_code = ?' : ''} LIMIT 1`,
       code,
+      ...(typeof branchCode === 'number' ? [branchCode] : []),
     ) as unknown[];
     return (normRows<Member>(rows)[0] as Member) ?? null;
   }
 
-  async findMembers(searchText: string): Promise<Member[]> {
+  async findMembers(searchText: string, branchCode?: number): Promise<Member[]> {
     const like = `%${searchText}%`;
     const rows = await this.prisma.$queryRawUnsafe(
       `${MEMBER_SELECT}
-       WHERE (? = '' OR CONCAT_WS(' ', first_name, other_names, comm_name, phone_no) LIKE ?)
-       ORDER BY first_name, other_names
-      LIMIT 20`,
+        WHERE (? = '' OR CONCAT_WS(' ', first_name, other_names, comm_name, phone_no) LIKE ?)
+         AND (? IS NULL OR br_code = ?)
+        ORDER BY first_name, other_names
+       LIMIT 20`,
       searchText,
       like,
+      branchCode ?? null,
+      branchCode ?? null,
     ) as unknown[];
     return normRows<Member>(rows) as Member[];
   }
 
-  async getFamily(code: number): Promise<Family | null> {
+  async getFamily(code: number, branchCode?: number): Promise<Family | null> {
     const rows = await this.prisma.$queryRawUnsafe(
-      `${FAM_SELECT} WHERE fam_code = ? LIMIT 1`,
+      `${FAM_SELECT} WHERE f.fam_code = ? ${typeof branchCode === 'number' ? 'AND m.br_code = ?' : ''} LIMIT 1`,
       code,
+      ...(typeof branchCode === 'number' ? [branchCode] : []),
     ) as unknown[];
     return (normRows<Family>(rows)[0] as Family) ?? null;
   }
 
-  async findFamilies(searchText: string): Promise<Family[]> {
+  async findFamilies(searchText: string, branchCode?: number): Promise<Family[]> {
     const like = `%${searchText}%`;
     const rows = await this.prisma.$queryRawUnsafe(
       `${FAM_SELECT}
-       WHERE (? = '' OR fam_name LIKE ? OR member_name LIKE ?)
-       ORDER BY fam_name
-       LIMIT 20`,
+        WHERE (? = '' OR f.fam_name LIKE ? OR f.member_name LIKE ?)
+         AND (? IS NULL OR m.br_code = ?)
+        ORDER BY f.fam_name
+        LIMIT 20`,
       searchText,
       like,
       like,
+      branchCode ?? null,
+      branchCode ?? null,
     ) as unknown[];
     return normRows<Family>(rows) as Family[];
   }

@@ -104,15 +104,16 @@ export class GuestSp {
     return normRow<SpRow>(row);
   }
 
-  async getGuest(code: number): Promise<Guest | null> {
+  async getGuest(code: number, branchCode?: number): Promise<Guest | null> {
     const rows = await this.prisma.$queryRawUnsafe(
-      `${GUEST_SELECT} WHERE guest_code = ? LIMIT 1`,
+      `${GUEST_SELECT} WHERE guest_code = ? ${typeof branchCode === 'number' ? 'AND br_code = ?' : ''} LIMIT 1`,
       code,
+      ...(typeof branchCode === 'number' ? [branchCode] : []),
     ) as unknown[];
     return (normRows<Guest>(rows)[0] as Guest) ?? null;
   }
 
-  async findGuests(f: GuestFilter): Promise<Guest[]> {
+  async findGuests(f: GuestFilter, branchCode?: number): Promise<Guest[]> {
     const stxt = f.stxt ?? '';
     const like = `%${stxt}%`;
     const vtype = f.vtype ?? null;
@@ -132,6 +133,7 @@ export class GuestSp {
         AND (? IS NULL OR g.vtype = ?)
         AND (? IS NULL OR g.sstage = ?)
         AND (? IS NULL OR fu.latest_status = ?)
+        AND (? IS NULL OR g.br_code = ?)
       ORDER BY g.vdt DESC, g.code DESC
       LIMIT 100
       `,
@@ -143,6 +145,8 @@ export class GuestSp {
       sstage,
       fuStat,
       fuStat,
+      branchCode ?? null,
+      branchCode ?? null,
     ) as unknown[];
     return normRows<Guest>(rows) as Guest[];
   }
