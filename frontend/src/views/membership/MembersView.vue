@@ -11,6 +11,7 @@ import BaseModal from '@/components/ui/BaseModal.vue';
 import DataTable from '@/components/ui/DataTable.vue';
 import { memberApi } from '@/api/member';
 import { useToast } from '@/composables/useToast';
+import { formatDateOnly } from '@/lib/dates';
 import { useMemberStore } from '@/stores/member';
 import { UserPlusIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
 
@@ -100,6 +101,9 @@ const open = (m: Member): void => {
       empty-text="No members found."
       @row-click="open"
     >
+      <template #jdt="{ value }">
+        {{ formatDateOnly(value as string) }}
+      </template>
       <template #fname="{ row }">
         <span class="font-medium text-slate-900">{{ row.fname }} {{ row.onames ?? '' }}</span>
       </template>

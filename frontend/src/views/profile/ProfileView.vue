@@ -7,6 +7,7 @@ import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseInput from '@/components/ui/BaseInput.vue';
 import { useToast } from '@/composables/useToast';
 import { authApi } from '@/api/auth';
+import { formatDateTime } from '@/lib/dates';
 import { useAuthStore } from '@/stores/auth';
 import { KeyIcon } from '@heroicons/vue/24/outline';
 
@@ -145,7 +146,7 @@ onMounted(async () => {
             Last Login
           </dt>
           <dd class="mt-1 text-sm text-slate-900">
-            {{ profile.last_login || '—' }}
+            {{ profile.last_login ? formatDateTime(profile.last_login) : '—' }}
           </dd>
         </div>
       </dl>
