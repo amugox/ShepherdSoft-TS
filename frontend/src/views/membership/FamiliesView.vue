@@ -11,6 +11,7 @@ import DataTable from '@/components/ui/DataTable.vue';
 import { memberApi } from '@/api/member';
 import { useToast } from '@/composables/useToast';
 import { useMemberStore } from '@/stores/member';
+import { HomeIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
 
 const store = useMemberStore();
 const toast = useToast();
@@ -55,8 +56,11 @@ const columns = [
           Families
         </h1>
       </div>
-      <BaseButton @click="addOpen = true">
-        + Add family
+      <BaseButton
+        :icon="HomeIcon"
+        @click="addOpen = true"
+      >
+        Add family
       </BaseButton>
     </header>
 
@@ -73,6 +77,7 @@ const columns = [
       <BaseButton
         variant="secondary"
         type="submit"
+        :icon="MagnifyingGlassIcon"
       >
         Search
       </BaseButton>

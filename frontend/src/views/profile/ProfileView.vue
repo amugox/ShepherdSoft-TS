@@ -8,6 +8,7 @@ import BaseInput from '@/components/ui/BaseInput.vue';
 import { useToast } from '@/composables/useToast';
 import { authApi } from '@/api/auth';
 import { useAuthStore } from '@/stores/auth';
+import { KeyIcon } from '@heroicons/vue/24/outline';
 
 const auth = useAuthStore();
 const toast = useToast();
@@ -183,6 +184,7 @@ onMounted(async () => {
         <div class="flex justify-end">
           <BaseButton
             type="submit"
+            :icon="KeyIcon"
             :loading="savingPassword"
           >
             Update password

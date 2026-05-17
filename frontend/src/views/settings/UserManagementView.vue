@@ -10,6 +10,7 @@ import BaseSelect from '@/components/ui/BaseSelect.vue';
 import DataTable from '@/components/ui/DataTable.vue';
 import { userApi } from '@/api/user';
 import { useToast } from '@/composables/useToast';
+import { UserPlusIcon, MagnifyingGlassIcon, PencilSquareIcon, EnvelopeIcon, NoSymbolIcon, CheckIcon } from '@heroicons/vue/24/outline';
 
 const toast = useToast();
 
@@ -147,8 +148,11 @@ onMounted(load);
           Create users, assign roles, deactivate accounts, and trigger password reset emails.
         </p>
       </div>
-      <BaseButton @click="createOpen = true">
-        + Add user
+      <BaseButton
+        :icon="UserPlusIcon"
+        @click="createOpen = true"
+      >
+        Add user
       </BaseButton>
     </header>
 
@@ -165,6 +169,7 @@ onMounted(load);
       <BaseButton
         variant="secondary"
         type="submit"
+        :icon="MagnifyingGlassIcon"
       >
         Search
       </BaseButton>
@@ -192,18 +197,21 @@ onMounted(load);
         <div class="flex gap-2">
           <BaseButton
             variant="secondary"
+            :icon="PencilSquareIcon"
             @click.stop="openEdit(row)"
           >
             Edit
           </BaseButton>
           <BaseButton
             variant="secondary"
+            :icon="EnvelopeIcon"
             @click.stop="sendReset(row)"
           >
             Send reset
           </BaseButton>
           <BaseButton
             variant="danger"
+            :icon="NoSymbolIcon"
             :disabled="row.user_stat !== 0"
             @click.stop="deactivate(row)"
           >
@@ -251,6 +259,7 @@ onMounted(load);
         </label>
         <div class="flex justify-end">
           <BaseButton
+            :icon="CheckIcon"
             :loading="saving"
             @click="submitCreate"
           >
@@ -292,6 +301,7 @@ onMounted(load);
         />
         <div class="flex justify-end">
           <BaseButton
+            :icon="CheckIcon"
             :loading="saving"
             @click="submitEdit"
           >

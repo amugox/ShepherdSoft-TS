@@ -10,6 +10,7 @@ import BaseTextarea from '@/components/ui/BaseTextarea.vue';
 import { todayLocal } from '@/lib/dates';
 import { useAuthStore } from '@/stores/auth';
 import { useReferenceStore } from '@/stores/reference';
+import { XMarkIcon, CheckIcon } from '@heroicons/vue/24/outline';
 
 const emit = defineEmits<{
   (e: 'submit', member: Member): void;
@@ -110,12 +111,14 @@ const genderOptions = [
       <BaseButton
         variant="secondary"
         type="button"
+        :icon="XMarkIcon"
         @click="emit('cancel')"
       >
         Cancel
       </BaseButton>
       <BaseButton
         type="submit"
+        :icon="CheckIcon"
         :loading="submitting"
       >
         Save

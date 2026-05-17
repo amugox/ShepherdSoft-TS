@@ -5,6 +5,7 @@ import type { Family } from '@shepherd/shared';
 
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseInput from '@/components/ui/BaseInput.vue';
+import { XMarkIcon, CheckIcon } from '@heroicons/vue/24/outline';
 
 defineProps<{ submitting?: boolean }>();
 
@@ -39,12 +40,14 @@ const form = reactive<Family>({
       <BaseButton
         variant="secondary"
         type="button"
+        :icon="XMarkIcon"
         @click="emit('cancel')"
       >
         Cancel
       </BaseButton>
       <BaseButton
         type="submit"
+        :icon="CheckIcon"
         :loading="submitting"
       >
         Save

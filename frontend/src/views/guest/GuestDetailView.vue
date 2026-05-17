@@ -11,6 +11,7 @@ import DataTable from '@/components/ui/DataTable.vue';
 import { guestApi } from '@/api/guest';
 import { useToast } from '@/composables/useToast';
 import { useAuthStore } from '@/stores/auth';
+import { ArrowUpCircleIcon, CalendarDaysIcon, TrashIcon } from '@heroicons/vue/24/outline';
 
 const props  = defineProps<{ code: string }>();
 const router = useRouter();
@@ -108,12 +109,14 @@ const followUpColumns = [
       <div class="flex gap-2">
         <BaseButton
           variant="secondary"
+          :icon="CalendarDaysIcon"
           @click="addOpen = true"
         >
           Schedule follow-up
         </BaseButton>
         <BaseButton
           variant="primary"
+          :icon="ArrowUpCircleIcon"
           :disabled="guest?.promoted"
           @click="promoteOpen = true"
         >
@@ -121,6 +124,7 @@ const followUpColumns = [
         </BaseButton>
         <BaseButton
           variant="danger"
+          :icon="TrashIcon"
           @click="remove"
         >
           Delete

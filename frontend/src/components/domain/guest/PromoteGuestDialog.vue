@@ -9,6 +9,7 @@ import BaseModal from '@/components/ui/BaseModal.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
 import { todayLocal } from '@/lib/dates';
 import { useReferenceStore } from '@/stores/reference';
+import { XMarkIcon, ArrowUpCircleIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps<{
   open: boolean;
@@ -80,11 +81,13 @@ onMounted(async () => { await reference.loadAll(); });
     <template #footer>
       <BaseButton
         variant="secondary"
+        :icon="XMarkIcon"
         @click="emit('close')"
       >
         Cancel
       </BaseButton>
       <BaseButton
+        :icon="ArrowUpCircleIcon"
         :loading="submitting"
         @click="emit('submit', submitPayload())"
       >

@@ -8,6 +8,7 @@ import BaseSelect from '@/components/ui/BaseSelect.vue';
 import { useToast } from '@/composables/useToast';
 import { useAuthStore } from '@/stores/auth';
 import { useReferenceStore } from '@/stores/reference';
+import { ArrowRightOnRectangleIcon, ShieldCheckIcon, EnvelopeIcon, LockOpenIcon } from '@heroicons/vue/24/outline';
 
 const auth = useAuthStore();
 const reference = useReferenceStore();
@@ -171,6 +172,7 @@ const onCompleteReset = async (): Promise<void> => {
       <BaseButton
         type="submit"
         class="w-full"
+        :icon="ArrowRightOnRectangleIcon"
         :loading="submitting"
       >
         Sign in
@@ -196,6 +198,7 @@ const onCompleteReset = async (): Promise<void> => {
       <BaseButton
         type="submit"
         class="w-full"
+        :icon="ShieldCheckIcon"
         :loading="submitting"
       >
         Verify OTP
@@ -212,6 +215,7 @@ const onCompleteReset = async (): Promise<void> => {
       />
       <BaseButton
         variant="secondary"
+        :icon="EnvelopeIcon"
         :loading="resetRequesting"
         @click="onRequestReset"
       >
@@ -239,6 +243,7 @@ const onCompleteReset = async (): Promise<void> => {
         />
         <BaseButton
           variant="secondary"
+          :icon="LockOpenIcon"
           :loading="resetCompleting"
           @click="onCompleteReset"
         >
