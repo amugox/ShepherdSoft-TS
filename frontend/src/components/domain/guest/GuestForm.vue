@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive } from 'vue';
+import { computed, onMounted, reactive, watch } from 'vue';
 
 import {
   BornAgainStatus,
@@ -23,8 +23,10 @@ const emit = defineEmits<{
   (e: 'cancel'): void;
 }>();
 
-defineProps<{
+const props = defineProps<{
   submitting?: boolean;
+  initialValue?: Guest;
+  editMode?: boolean;
 }>();
 
 const reference = useReferenceStore();
@@ -52,18 +54,27 @@ const empty = (): Guest => ({
   returning: false,
 });
 
-const form = reactive<Guest>(empty());
+const initial = (): Guest => props.initialValue ? { ...props.initialValue } : empty();
+
+const form = reactive<Guest>(initial());
+
+/** Warn when "schedule follow-up" is checked but neither phone nor email is provided. */
+const followUpContactWarning = computed(
+  () => form.followup && !form.pno?.trim() && !form.email?.trim(),
+);
 
 onMounted(async () => {
   await reference.loadAll();
 });
 
+watch(() => props.initialValue, (v) => {
+  if (v) Object.assign(form, { ...v });
+});
+
 const reset = (): void => {
-  Object.assign(form, empty());
+  Object.assign(form, initial());
 };
 
-// Parent calls `formRef.reset()` after a successful submit so that submission
-// failure doesn't wipe the user's input.
 defineExpose({ reset });
 
 const onSubmit = (): void => {
@@ -174,6 +185,17 @@ const heardViaOptions = [
           label="Referral details"
         />
       </div>
+      <label
+        v-if="!editMode"
+        class="mt-3 inline-flex items-center gap-2 text-sm text-slate-700"
+      >
+        <input
+          v-model="form.returning"
+          type="checkbox"
+          class="rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+        >
+        Returning visitor
+      </label>
     </section>
 
     <section>
@@ -228,6 +250,12 @@ const heardViaOptions = [
         >
         Schedule a follow-up
       </label>
+      <p
+        v-if="followUpContactWarning"
+        class="mt-1 text-xs text-amber-600"
+      >
+        ⚠ No phone or email provided — a follow-up contact may not be reachable.
+      </p>
     </section>
 
     <div class="flex justify-end gap-2 pt-2">
@@ -244,7 +272,7 @@ const heardViaOptions = [
         :icon="CheckIcon"
         :loading="submitting"
       >
-        Save guest
+        {{ editMode ? 'Update guest' : 'Save guest' }}
       </BaseButton>
     </div>
   </form>

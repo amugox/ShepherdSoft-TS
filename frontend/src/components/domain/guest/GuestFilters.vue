@@ -2,7 +2,9 @@
 import { reactive, watch } from 'vue';
 
 import {
+  BornAgainStatus,
   FollowUpStatus,
+  HeardVia,
   SpiritualStage,
   VisitType,
   type GuestFilter,
@@ -28,46 +30,80 @@ const visitTypeOptions = [
   { value: VisitType.Joining, label: 'Joining' },
 ];
 const stageOptions = [
-  { value: SpiritualStage.New, label: 'New' },
-  { value: SpiritualStage.Growing, label: 'Growing' },
-  { value: SpiritualStage.Mature, label: 'Mature' },
+  { value: SpiritualStage.New,       label: 'New' },
+  { value: SpiritualStage.Growing,   label: 'Growing' },
+  { value: SpiritualStage.Mature,    label: 'Mature' },
   { value: SpiritualStage.Exploring, label: 'Exploring' },
 ];
 const fuStatusOptions = [
-  { value: FollowUpStatus.Pending, label: 'Pending' },
-  { value: FollowUpStatus.Complete, label: 'Complete' },
+  { value: FollowUpStatus.Pending,   label: 'Pending' },
+  { value: FollowUpStatus.Complete,  label: 'Complete' },
   { value: FollowUpStatus.Cancelled, label: 'Cancelled' },
+];
+const heardViaOptions = [
+  { value: HeardVia.SocialMedia, label: 'Social media' },
+  { value: HeardVia.SignPost,    label: 'Sign post' },
+  { value: HeardVia.GoogleMap,   label: 'Google Maps' },
+  { value: HeardVia.Invited,     label: 'Invited' },
+  { value: HeardVia.Other,       label: 'Other' },
+];
+const bornAgainOptions = [
+  { value: BornAgainStatus.Yes,     label: 'Yes' },
+  { value: BornAgainStatus.No,      label: 'No' },
+  { value: BornAgainStatus.Unknown, label: 'Unknown' },
 ];
 </script>
 
 <template>
   <form
-    class="card grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-5"
+    class="card space-y-3 p-4"
     @submit.prevent="emit('submit')"
   >
-    <BaseInput
-      v-model="local.stxt"
-      label="Search"
-      placeholder="Name, phone or email"
-    />
-    <BaseSelect
-      v-model="local.vtype"
-      label="Visit type"
-      :options="visitTypeOptions"
-    />
-    <BaseSelect
-      v-model="local.sstage"
-      label="Spiritual stage"
-      :options="stageOptions"
-    />
-    <BaseSelect
-      v-model="local.fu_stat"
-      label="Follow-up status"
-      :options="fuStatusOptions"
-    />
-    <div class="flex items-end">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <BaseInput
+        v-model="local.stxt"
+        label="Search"
+        placeholder="Name, phone or email"
+      />
+      <BaseSelect
+        v-model="local.vtype"
+        label="Visit type"
+        :options="visitTypeOptions"
+      />
+      <BaseSelect
+        v-model="local.sstage"
+        label="Spiritual stage"
+        :options="stageOptions"
+      />
+      <BaseSelect
+        v-model="local.fu_stat"
+        label="Follow-up status"
+        :options="fuStatusOptions"
+      />
+      <BaseInput
+        v-model="local.vdt_from"
+        type="date"
+        label="Visit from"
+      />
+      <BaseInput
+        v-model="local.vdt_to"
+        type="date"
+        label="Visit to"
+      />
+      <BaseSelect
+        v-model="local.heard"
+        label="Heard via"
+        :options="heardViaOptions"
+      />
+      <BaseSelect
+        v-model="local.ba"
+        label="Born again"
+        :options="bornAgainOptions"
+      />
+    </div>
+    <div class="flex justify-end">
       <button
-        class="btn-primary w-full"
+        class="btn-primary"
         type="submit"
       >
         <FunnelIcon class="h-4 w-4 shrink-0" />
