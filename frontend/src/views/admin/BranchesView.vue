@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { RouterLink } from 'vue-router';
 
 import type { BranchAdminRecord } from '@shepherd/shared';
 
@@ -134,6 +135,15 @@ onMounted(load);
         <span :class="row.stat === 0 ? 'text-emerald-700' : 'text-rose-700'">
           {{ row.stat === 0 ? 'Active' : 'Inactive' }}
         </span>
+      </template>
+      <template #users_count="{ row }">
+        <RouterLink
+          :to="{ path: '/admin/users', query: { branchCode: String(row.br_code) } }"
+          class="font-medium text-brand-700 underline-offset-2 hover:underline"
+          @click.stop
+        >
+          {{ row.users_count }}
+        </RouterLink>
       </template>
       <template #actions="{ row }">
         <div class="flex gap-2">

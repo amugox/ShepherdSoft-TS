@@ -106,9 +106,8 @@ export class AdminService {
 
     const nextCodeRows = await this.prisma.$queryRawUnsafe(
       'SELECT COALESCE(MAX(br_code), 0) + 1 AS next_code FROM branches',
-    ) as Array<{ next_code: number }>;
-    const nextCode = nextCodeRows[0]?.next_code;
-    if (!nextCode) throw new BadRequestException('Failed to allocate branch code.');
+    ) as Array<{ next_code: number | bigint | null }>;
+    const nextCode = this.toAllocatedCode(nextCodeRows[0]?.next_code, 'Failed to allocate branch code.');
 
     await this.prisma.branches.create({
       data: {
@@ -237,9 +236,8 @@ export class AdminService {
 
     const nextCodeRows = await this.prisma.$queryRawUnsafe(
       'SELECT COALESCE(MAX(user_code), 0) + 1 AS next_code FROM branch_users',
-    ) as Array<{ next_code: number }>;
-    const nextCode = nextCodeRows[0]?.next_code;
-    if (!nextCode) throw new BadRequestException('Failed to allocate user code.');
+    ) as Array<{ next_code: number | bigint | null }>;
+    const nextCode = this.toAllocatedCode(nextCodeRows[0]?.next_code, 'Failed to allocate user code.');
 
     const salt = generateToken(20);
     const tempPassword = generateToken(12);
@@ -389,9 +387,8 @@ export class AdminService {
 
     const nextCodeRows = await this.prisma.$queryRawUnsafe(
       'SELECT COALESCE(MAX(user_code), 0) + 1 AS next_code FROM users',
-    ) as Array<{ next_code: number }>;
-    const nextCode = nextCodeRows[0]?.next_code;
-    if (!nextCode) throw new BadRequestException('Failed to allocate user code.');
+    ) as Array<{ next_code: number | bigint | null }>;
+    const nextCode = this.toAllocatedCode(nextCodeRows[0]?.next_code, 'Failed to allocate user code.');
 
     const salt = generateToken(20);
     const tempPassword = generateToken(12);
@@ -514,5 +511,18 @@ export class AdminService {
       stat: row.stat,
       ...(row.users_count === undefined || row.users_count === null ? {} : { users_count: Number(row.users_count) }),
     };
+  }
+
+  private toAllocatedCode(raw: number | bigint | null | undefined, errorMessage: string): number {
+    if (raw === undefined || raw === null) {
+      throw new BadRequestException(errorMessage);
+    }
+
+    const code = Number(raw);
+    if (!Number.isInteger(code) || code <= 0) {
+      throw new BadRequestException(errorMessage);
+    }
+
+    return code;
   }
 }
