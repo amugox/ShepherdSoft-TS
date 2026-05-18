@@ -58,7 +58,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       where: {
         sess_id: userData.SessionID,
         user_code: userData.UserCode,
-        user_type: userData.UserType ?? 0,
         sess_stat: 0,
       },
       select: { id: true },
