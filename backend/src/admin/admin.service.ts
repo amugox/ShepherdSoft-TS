@@ -509,10 +509,10 @@ export class AdminService {
 
   private toBranchRecord(row: BranchAdminRow): BranchAdminRecord {
     return {
-      ...row,
-      ...(row.users_count === undefined || row.users_count === null
-        ? {}
-        : { users_count: Number(row.users_count) }),
+      br_code: row.br_code,
+      br_name: row.br_name,
+      stat: row.stat,
+      ...(row.users_count === undefined || row.users_count === null ? {} : { users_count: Number(row.users_count) }),
     };
   }
 }
