@@ -6,9 +6,14 @@ import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseInput from '@/components/ui/BaseInput.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
 import { useToast } from '@/composables/useToast';
+import { isAdminRole } from '@/lib/roles';
 import { useAuthStore } from '@/stores/auth';
 import { useReferenceStore } from '@/stores/reference';
 import { ArrowRightOnRectangleIcon, ShieldCheckIcon, EnvelopeIcon, LockOpenIcon } from '@heroicons/vue/24/outline';
+
+const props = withDefaults(defineProps<{ adminOnly?: boolean }>(), {
+  adminOnly: false,
+});
 
 const auth = useAuthStore();
 const reference = useReferenceStore();
@@ -43,9 +48,10 @@ onMounted(async () => {
 const navigateAfterLogin = async (): Promise<void> => {
   const raw = route.query.return;
   const candidate = Array.isArray(raw) ? raw[0] : raw;
-  const target = typeof candidate === 'string' && candidate.startsWith('/') && !candidate.startsWith('//')
-    ? candidate
-    : '/';
+  const validCandidate = typeof candidate === 'string' && candidate.startsWith('/') && !candidate.startsWith('//');
+  const target = props.adminOnly
+    ? (validCandidate && candidate.startsWith('/admin') ? candidate : '/admin')
+    : (validCandidate ? candidate : '/');
   await router.push(target);
 };
 
@@ -64,6 +70,11 @@ const onSubmit = async (): Promise<void> => {
 
     if (auth.otpChallenge) {
       toast.success(`OTP sent to ${auth.otpChallenge.maskedEmail ?? 'your email'}.`);
+      return;
+    }
+    if (props.adminOnly && !isAdminRole(auth.user?.role)) {
+      toast.error('This account does not have admin access.');
+      await auth.logout('/admin/auth/login');
       return;
     }
 
@@ -145,10 +156,10 @@ const onCompleteReset = async (): Promise<void> => {
       @submit.prevent="onSubmit"
     >
       <h1 class="text-lg font-semibold text-slate-900">
-        Sign in
+        {{ props.adminOnly ? 'Admin sign in' : 'Sign in' }}
       </h1>
       <p class="text-sm text-slate-500">
-        Use your branch credentials.
+        {{ props.adminOnly ? 'Use admin credentials to access the admin area.' : 'Use your branch credentials.' }}
       </p>
       <BaseSelect
         v-model="branchCode"

@@ -24,9 +24,26 @@ describe('globalAuthGuard', () => {
     mockAuth.isAuthenticated = false;
     const result = globalAuthGuard.call(undefined, {
       fullPath: '/admin/users',
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresAdmin: true },
     } as never, {} as never, {} as never);
-    expect(result).toEqual({ path: '/auth/login', query: { return: '/admin/users' } });
+    expect(result).toEqual({ path: '/admin/auth/login', query: { return: '/admin/users' } });
+  });
+
+  it('redirects authenticated admin away from admin login to admin area', () => {
+    const result = globalAuthGuard.call(undefined, {
+      fullPath: '/admin/auth/login',
+      meta: { requiresAuth: false, publicOnly: true, adminLogin: true },
+    } as never, {} as never, {} as never);
+    expect(result).toEqual({ path: '/admin' });
+  });
+
+  it('redirects authenticated non-admin away from admin login to app home', () => {
+    mockAuth.user = { role: 'Viewer' };
+    const result = globalAuthGuard.call(undefined, {
+      fullPath: '/admin/auth/login',
+      meta: { requiresAuth: false, publicOnly: true, adminLogin: true },
+    } as never, {} as never, {} as never);
+    expect(result).toEqual({ path: '/' });
   });
 
   it('blocks non-admin users from admin routes', () => {

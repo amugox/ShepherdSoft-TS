@@ -24,6 +24,20 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: '/admin/auth',
+    component: () => import('@/layouts/AuthLayout.vue'),
+    meta: { requiresAuth: false },
+    children: [
+      {
+        path: 'login',
+        name: 'admin-login',
+        meta: { requiresAuth: false, publicOnly: true, adminLogin: true },
+        component: () => import('@/views/auth/LoginView.vue'),
+        props: { adminOnly: true },
+      },
+    ],
+  },
+  {
     path: '/',
     component: () => import('@/layouts/DefaultLayout.vue'),
     meta: { requiresAuth: true },

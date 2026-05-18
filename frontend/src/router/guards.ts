@@ -13,6 +13,8 @@ declare module 'vue-router' {
     requiresAdmin?: boolean;
     /** Restrict route to super-admin users only. */
     requiresSuperAdmin?: boolean;
+    /** Marks login routes dedicated to admin-only area entry. */
+    adminLogin?: boolean;
   }
 }
 
@@ -23,12 +25,16 @@ export const globalAuthGuard: NavigationGuardWithThis<undefined> = (
   auth.hydrateFromStorage();
 
   if (to.meta.publicOnly && auth.isAuthenticated) {
+    if (to.meta.adminLogin) {
+      return { path: isAdminRole(auth.user?.role) ? '/admin' : '/' };
+    }
     return { path: '/' };
   }
   // Default: every route requires auth unless explicitly marked otherwise.
   const requiresAuth = to.meta.requiresAuth ?? true;
   if (requiresAuth && !auth.isAuthenticated) {
-    return { path: '/auth/login', query: { return: to.fullPath } };
+    const loginPath = to.meta.requiresAdmin ? '/admin/auth/login' : '/auth/login';
+    return { path: loginPath, query: { return: to.fullPath } };
   }
   if (to.meta.requiresAdmin) {
     if (!isAdminRole(auth.user?.role)) return { path: '/' };
