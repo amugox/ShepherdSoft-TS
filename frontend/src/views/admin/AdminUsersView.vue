@@ -10,6 +10,7 @@ import BaseInput from '@/components/ui/BaseInput.vue';
 import BaseModal from '@/components/ui/BaseModal.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
 import DataTable from '@/components/ui/DataTable.vue';
+import DropdownMenu, { type DropdownMenuItem } from '@/components/ui/DropdownMenu.vue';
 import { useToast } from '@/composables/useToast';
 import { isSystemSuperAdminUser } from '@/lib/roles';
 import { useAuthStore } from '@/stores/auth';
@@ -162,6 +163,12 @@ const sendReset = async (row: AdminUserRecord): Promise<void> => {
   }
 };
 
+const rowMenuItems = (row: AdminUserRecord): DropdownMenuItem[] => [
+  { label: 'Edit', icon: PencilSquareIcon, action: () => openEdit(row) },
+  { label: 'Send reset', icon: EnvelopeIcon, action: () => sendReset(row) },
+  { label: 'Deactivate', icon: NoSymbolIcon, variant: 'danger', disabled: row.user_stat !== 0, action: () => deactivate(row) },
+];
+
 onMounted(async () => {
   try {
     resetCreateForm();
@@ -193,25 +200,22 @@ onMounted(async () => {
     </header>
 
     <form
-      class="grid grid-cols-1 gap-2 md:grid-cols-3"
+      class="flex flex-wrap items-end gap-2"
       @submit.prevent="load"
     >
       <BaseInput
         v-model="filters.searchText"
         label="Search"
         placeholder="Username, name, phone or email"
-        class="md:col-span-2"
+        class="w-64"
       />
-      <div class="flex items-end">
-        <BaseButton
-          variant="secondary"
-          type="submit"
-          :icon="MagnifyingGlassIcon"
-          class="w-full"
-        >
-          Search
-        </BaseButton>
-      </div>
+      <BaseButton
+        variant="secondary"
+        type="submit"
+        :icon="MagnifyingGlassIcon"
+      >
+        Search
+      </BaseButton>
     </form>
 
     <label class="inline-flex items-center gap-2 text-sm text-slate-700">
@@ -232,7 +236,7 @@ onMounted(async () => {
         { key: 'email', label: 'Email' },
         { key: 'role_name', label: 'Role', width: '140px' },
         { key: 'user_stat', label: 'Status', width: '100px' },
-        { key: 'actions', label: 'Actions', width: '250px' },
+        { key: 'actions', label: '', width: '120px' },
       ]"
       :loading="loading"
       empty-text="No admins found."
@@ -243,29 +247,8 @@ onMounted(async () => {
         </span>
       </template>
       <template #actions="{ row }">
-        <div class="flex gap-2">
-          <BaseButton
-            variant="secondary"
-            :icon="PencilSquareIcon"
-            @click.stop="openEdit(row)"
-          >
-            Edit
-          </BaseButton>
-          <BaseButton
-            variant="secondary"
-            :icon="EnvelopeIcon"
-            @click.stop="sendReset(row)"
-          >
-            Send reset
-          </BaseButton>
-          <BaseButton
-            variant="danger"
-            :icon="NoSymbolIcon"
-            :disabled="row.user_stat !== 0"
-            @click.stop="deactivate(row)"
-          >
-            Deactivate
-          </BaseButton>
+        <div class="flex justify-end">
+          <DropdownMenu :items="rowMenuItems(row)" />
         </div>
       </template>
     </DataTable>
