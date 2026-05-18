@@ -4,6 +4,8 @@
  * ShepherdSoft.DBL.Entities.Guest / GuestFollowUp verbatim.
  */
 
+import type { PageParams } from './page';
+
 /**
  * ShepherdSoft.DBL.Entities.Guest
  *   code        → Guest_Code
@@ -74,7 +76,7 @@ export interface Guest {
 }
 
 /** GuestFilterModel — already short-keyed in ApiModels.cs. */
-export interface GuestFilter {
+export interface GuestFilter extends PageParams {
   stxt?: string;
   vtype?: number | null;
   sstage?: number | null;

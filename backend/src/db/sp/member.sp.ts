@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
-import type { Family, Member } from '@shepherd/shared';
+import type { Family, Member, PageResult, SearchPayload } from '@shepherd/shared';
 
+import { clampPage, pageResult } from '../page';
 import { MySqlService } from '../mysql.service';
 import { PrismaService } from '../prisma.service';
 import { normRow, normRows, type SpRow } from './types';
@@ -88,6 +89,7 @@ export class MemberSp {
     return (normRows<Member>(rows)[0] as Member) ?? null;
   }
 
+<<<<<<< HEAD
   async findMembers(searchText: string, branchCode?: number): Promise<Member[]> {
     const like = `%${searchText}%`;
     const rows = await this.prisma.$queryRawUnsafe(
@@ -102,6 +104,30 @@ export class MemberSp {
       branchCode ?? null,
     ) as unknown[];
     return normRows<Member>(rows) as Member[];
+=======
+  async findMembers(p?: SearchPayload): Promise<PageResult<Member>> {
+    const stxt = p?.stxt ?? '';
+    const like = `%${stxt}%`;
+    const clamped = clampPage(p);
+    const WHERE = `WHERE (? = '' OR CONCAT_WS(' ', first_name, other_names, comm_name, phone_no) LIKE ?)`;
+    const params = [stxt, like];
+
+    const [rows, countRows] = await Promise.all([
+      this.prisma.$queryRawUnsafe(
+        `${MEMBER_SELECT} ${WHERE} ORDER BY first_name, other_names LIMIT ? OFFSET ?`,
+        ...params,
+        clamped.pageSize,
+        clamped.offset,
+      ) as Promise<unknown[]>,
+      this.prisma.$queryRawUnsafe(
+        `SELECT COUNT(*) AS total FROM vw_members ${WHERE}`,
+        ...params,
+      ) as Promise<unknown[]>,
+    ]);
+
+    const total = Number((countRows[0] as { total?: bigint | number })?.total ?? 0);
+    return pageResult(normRows<Member>(rows) as Member[], total, clamped);
+>>>>>>> a7445f1 (feat: add server-side pagination to DataTable list views)
   }
 
   async getFamily(code: number, branchCode?: number): Promise<Family | null> {
@@ -113,6 +139,7 @@ export class MemberSp {
     return (normRows<Family>(rows)[0] as Family) ?? null;
   }
 
+<<<<<<< HEAD
   async findFamilies(searchText: string, branchCode?: number): Promise<Family[]> {
     const like = `%${searchText}%`;
     const rows = await this.prisma.$queryRawUnsafe(
@@ -128,5 +155,29 @@ export class MemberSp {
       branchCode ?? null,
     ) as unknown[];
     return normRows<Family>(rows) as Family[];
+=======
+  async findFamilies(p?: SearchPayload): Promise<PageResult<Family>> {
+    const stxt = p?.stxt ?? '';
+    const like = `%${stxt}%`;
+    const clamped = clampPage(p);
+    const WHERE = `WHERE (? = '' OR fam_name LIKE ? OR member_name LIKE ?)`;
+    const params = [stxt, like, like];
+
+    const [rows, countRows] = await Promise.all([
+      this.prisma.$queryRawUnsafe(
+        `${FAM_SELECT} ${WHERE} ORDER BY fam_name LIMIT ? OFFSET ?`,
+        ...params,
+        clamped.pageSize,
+        clamped.offset,
+      ) as Promise<unknown[]>,
+      this.prisma.$queryRawUnsafe(
+        `SELECT COUNT(*) AS total FROM vw_fams ${WHERE}`,
+        ...params,
+      ) as Promise<unknown[]>,
+    ]);
+
+    const total = Number((countRows[0] as { total?: bigint | number })?.total ?? 0);
+    return pageResult(normRows<Family>(rows) as Family[], total, clamped);
+>>>>>>> a7445f1 (feat: add server-side pagination to DataTable list views)
   }
 }

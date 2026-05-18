@@ -23,11 +23,22 @@ const search     = ref('');
 const addOpen    = ref(false);
 const submitting = ref(false);
 
-const refresh = async (): Promise<void> => {
-  try { await memberStore.find(search.value); }
+const load = async (applySearch: boolean): Promise<void> => {
+  try { await memberStore.find(applySearch ? search.value : undefined); }
   catch (err) { toast.error(err instanceof Error ? err.message : 'Failed to load.'); }
 };
+const refresh = (): Promise<void> => load(true);
 onMounted(refresh);
+
+const onPage = (p: number): void => {
+  memberStore.membersPage = p;
+  void load(false);
+};
+const onPageSize = (size: number): void => {
+  memberStore.membersPageSize = size;
+  memberStore.membersPage = 1;
+  void load(false);
+};
 
 const onAdd = async (m: Member): Promise<void> => {
   submitting.value = true;
@@ -98,8 +109,13 @@ const open = (m: Member): void => {
       :rows="memberStore.members"
       :columns="columns"
       :loading="memberStore.loading"
+      :total="memberStore.membersTotal"
+      :page="memberStore.membersPage"
+      :page-size="memberStore.membersPageSize"
       empty-text="No members found."
       @row-click="open"
+      @update:page="onPage"
+      @update:page-size="onPageSize"
     >
       <template #jdt="{ value }">
         {{ formatDateOnly(value as string) }}

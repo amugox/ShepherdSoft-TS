@@ -28,15 +28,32 @@ const columns = [
   { key: 'sstage',   label: 'Stage', align: 'center' as const, width: '90px' },
 ];
 
+<<<<<<< HEAD
 const refresh = async (): Promise<void> => {
   try { await guest.find({ ...filter.value, page: 1, page_size: pageSize }); }
+=======
+const load = async (applyFilter: boolean): Promise<void> => {
+  try { await guest.find(applyFilter ? filter.value : undefined); }
+>>>>>>> a7445f1 (feat: add server-side pagination to DataTable list views)
   catch (err) { toast.error(err instanceof Error ? err.message : 'Failed to load.'); }
 };
+const refresh = (): Promise<void> => load(true);
 onMounted(refresh);
 
+<<<<<<< HEAD
 const goToPage = async (page: number): Promise<void> => {
   try { await guest.find({ ...filter.value, page, page_size: pageSize }); }
   catch (err) { toast.error(err instanceof Error ? err.message : 'Failed.'); }
+=======
+const onPage = (p: number): void => {
+  guest.guestsPage = p;
+  void load(false);
+};
+const onPageSize = (size: number): void => {
+  guest.guestsPageSize = size;
+  guest.guestsPage = 1;
+  void load(false);
+>>>>>>> a7445f1 (feat: add server-side pagination to DataTable list views)
 };
 
 const openGuest = (row: Guest): void => {
@@ -120,8 +137,13 @@ const exportCsv = (): void => {
       :rows="guest.guests"
       :columns="columns"
       :loading="guest.loading"
+      :total="guest.guestsTotal"
+      :page="guest.guestsPage"
+      :page-size="guest.guestsPageSize"
       empty-text="No guests match the current filter."
       @row-click="openGuest"
+      @update:page="onPage"
+      @update:page-size="onPageSize"
     >
       <template #vdt="{ value }">
         {{ formatDateOnly(value as string) }}
