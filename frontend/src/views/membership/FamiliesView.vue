@@ -7,6 +7,7 @@ import FamilyForm from '@/components/domain/member/FamilyForm.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseInput from '@/components/ui/BaseInput.vue';
 import BaseModal from '@/components/ui/BaseModal.vue';
+import BreadcrumbNav from '@/components/ui/BreadcrumbNav.vue';
 import DataTable from '@/components/ui/DataTable.vue';
 import { memberApi } from '@/api/member';
 import { useToast } from '@/composables/useToast';
@@ -61,6 +62,7 @@ const columns = [
 
 <template>
   <section class="space-y-4">
+    <BreadcrumbNav :items="[{ label: 'Home', to: '/' }, { label: 'Members', to: '/membership' }, { label: 'Families' }]" />
     <header class="flex items-center justify-between">
       <div>
         <h1 class="text-xl font-semibold text-slate-900">

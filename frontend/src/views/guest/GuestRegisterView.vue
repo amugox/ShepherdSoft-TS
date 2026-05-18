@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router';
 import type { Guest } from '@shepherd/shared';
 
 import GuestForm from '@/components/domain/guest/GuestForm.vue';
+import BreadcrumbNav from '@/components/ui/BreadcrumbNav.vue';
 import { guestApi } from '@/api/guest';
 import { useToast } from '@/composables/useToast';
 
@@ -28,6 +29,7 @@ const onSubmit = async (g: Guest): Promise<void> => {
 
 <template>
   <section class="space-y-4">
+    <BreadcrumbNav :items="[{ label: 'Home', to: '/' }, { label: 'Guests', to: '/guest' }, { label: 'Register guest' }]" />
     <header>
       <h1 class="text-xl font-semibold text-slate-900">
         Register guest

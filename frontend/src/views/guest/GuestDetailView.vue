@@ -16,6 +16,7 @@ import FollowUpAddDialog from '@/components/domain/guest/FollowUpAddDialog.vue';
 import GuestForm from '@/components/domain/guest/GuestForm.vue';
 import PromoteGuestDialog from '@/components/domain/guest/PromoteGuestDialog.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
+import BreadcrumbNav from '@/components/ui/BreadcrumbNav.vue';
 import BaseModal from '@/components/ui/BaseModal.vue';
 import DataTable from '@/components/ui/DataTable.vue';
 import { guestApi } from '@/api/guest';
@@ -164,6 +165,7 @@ const followUpColumns = [
 
 <template>
   <section class="space-y-6">
+    <BreadcrumbNav :items="[{ label: 'Home', to: '/' }, { label: 'Guests', to: '/guest' }, { label: fullName || 'Guest' }]" />
     <!-- Edit mode -->
     <div
       v-if="editMode && guest"

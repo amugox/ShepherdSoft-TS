@@ -6,6 +6,7 @@ import type { BranchAdminRecord, UserAdminRecord, UserRoleItem } from '@shepherd
 
 import { adminApi } from '@/api/admin';
 import BaseButton from '@/components/ui/BaseButton.vue';
+import BreadcrumbNav from '@/components/ui/BreadcrumbNav.vue';
 import BaseInput from '@/components/ui/BaseInput.vue';
 import BaseModal from '@/components/ui/BaseModal.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
@@ -56,6 +57,18 @@ const branchOptions = computed(() => branches.value.map((b) => ({ value: b.br_co
 const selectedBranch = computed(() =>
   branches.value.find((branch) => branch.br_code === filters.value.branchCode),
 );
+
+const breadcrumb = computed(() => {
+  const base = [{ label: 'Admin', to: '/admin' }];
+  if (filters.value.branchCode > 0 && selectedBranch.value) {
+    return [
+      ...base,
+      { label: 'Branches', to: '/admin/branches' },
+      { label: selectedBranch.value.br_name },
+    ];
+  }
+  return [...base, { label: 'Branch Users' }];
+});
 
 const parseBranchCode = (value: unknown): number => {
   const raw = Array.isArray(value) ? value[0] : value;
@@ -219,6 +232,7 @@ watch(
 
 <template>
   <section class="space-y-4">
+    <BreadcrumbNav :items="breadcrumb" />
     <header class="flex items-center justify-between gap-4">
       <div>
         <h1 class="text-xl font-semibold text-slate-900">

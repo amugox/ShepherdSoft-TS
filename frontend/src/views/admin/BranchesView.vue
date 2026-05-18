@@ -6,6 +6,7 @@ import type { BranchAdminRecord } from '@shepherd/shared';
 
 import { adminApi } from '@/api/admin';
 import BaseButton from '@/components/ui/BaseButton.vue';
+import BreadcrumbNav from '@/components/ui/BreadcrumbNav.vue';
 import BaseInput from '@/components/ui/BaseInput.vue';
 import BaseModal from '@/components/ui/BaseModal.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
@@ -13,7 +14,7 @@ import DataTable from '@/components/ui/DataTable.vue';
 import { useToast } from '@/composables/useToast';
 import { isSystemSuperAdminUser } from '@/lib/roles';
 import { useAuthStore } from '@/stores/auth';
-import { BuildingOfficeIcon, PlusIcon, PencilSquareIcon, NoSymbolIcon, CheckIcon } from '@heroicons/vue/24/outline';
+import { BuildingOfficeIcon, PlusIcon, PencilSquareIcon, NoSymbolIcon, CheckIcon, UsersIcon } from '@heroicons/vue/24/outline';
 
 const auth = useAuthStore();
 const toast = useToast();
@@ -101,6 +102,7 @@ onMounted(load);
 
 <template>
   <section class="space-y-4">
+    <BreadcrumbNav :items="[{ label: 'Admin', to: '/admin' }, { label: 'Branches' }]" />
     <header class="flex items-center justify-between gap-4">
       <div>
         <h1 class="text-xl font-semibold text-slate-900">
@@ -152,6 +154,7 @@ onMounted(load);
             class="btn-secondary"
             @click.stop
           >
+            <UsersIcon class="h-4 w-4 shrink-0" />
             Users
           </RouterLink>
           <BaseButton

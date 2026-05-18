@@ -5,16 +5,25 @@ import type { UserProfileData } from '@shepherd/shared';
 
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseInput from '@/components/ui/BaseInput.vue';
+import BreadcrumbNav from '@/components/ui/BreadcrumbNav.vue';
 import { useToast } from '@/composables/useToast';
 import { authApi } from '@/api/auth';
 import { formatDateTime } from '@/lib/dates';
 import { isSystemAdminUser } from '@/lib/roles';
 import { useAuthStore } from '@/stores/auth';
+import { useRoute } from 'vue-router';
 import { KeyIcon } from '@heroicons/vue/24/outline';
 
 const auth = useAuthStore();
 const toast = useToast();
+const route = useRoute();
 const isSystemAdmin = computed(() => isSystemAdminUser(auth.user));
+const isAdminArea = computed(() => route.path.startsWith('/admin'));
+const breadcrumb = computed(() =>
+  isAdminArea.value
+    ? [{ label: 'Admin', to: '/admin' }, { label: 'My Profile' }]
+    : [{ label: 'Home', to: '/' }, { label: 'My Profile' }],
+);
 
 // — Profile data —
 const profile = ref<UserProfileData | null>(null);
@@ -72,6 +81,7 @@ onMounted(async () => {
 
 <template>
   <section class="space-y-6">
+    <BreadcrumbNav :items="breadcrumb" />
     <header>
       <h1 class="text-xl font-semibold text-slate-900">
         My Profile

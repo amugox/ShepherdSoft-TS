@@ -4,6 +4,7 @@ import { onMounted, ref } from 'vue';
 import { ListItemType, type ListItem } from '@shepherd/shared';
 
 import DataTable from '@/components/ui/DataTable.vue';
+import BreadcrumbNav from '@/components/ui/BreadcrumbNav.vue';
 import { dataApi } from '@/api/data';
 import { useToast } from '@/composables/useToast';
 
@@ -30,6 +31,7 @@ const columns = [
 
 <template>
   <section class="space-y-4">
+    <BreadcrumbNav :items="[{ label: 'Home', to: '/' }, { label: 'Members', to: '/membership' }, { label: 'Fellowships' }]" />
     <header>
       <h1 class="text-xl font-semibold text-slate-900">
         Fellowships

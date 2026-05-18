@@ -7,6 +7,7 @@ import type { GuestFollowUp, GuestFollowUpCompletePayload, GuestFollowUpReschedu
 import FollowUpCompleteDialog from '@/components/domain/guest/FollowUpCompleteDialog.vue';
 import FollowUpRescheduleDialog from '@/components/domain/guest/FollowUpRescheduleDialog.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
+import BreadcrumbNav from '@/components/ui/BreadcrumbNav.vue';
 import DataTable from '@/components/ui/DataTable.vue';
 import { guestApi } from '@/api/guest';
 import { useToast } from '@/composables/useToast';
@@ -90,6 +91,7 @@ const columns = [
 
 <template>
   <section class="space-y-4">
+    <BreadcrumbNav :items="[{ label: 'Home', to: '/' }, { label: 'Guests', to: '/guest' }, { label: 'Follow-ups' }]" />
     <header>
       <h1 class="text-xl font-semibold text-slate-900">
         Pending follow-ups
