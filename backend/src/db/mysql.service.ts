@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import mysql, { type Pool, type RowDataPacket } from 'mysql2/promise';
+import mysql, { type Pool, type PoolConnection, type RowDataPacket } from 'mysql2/promise';
 import { URL } from 'node:url';
 
 import type { AppConfig } from '../config/configuration';
@@ -83,6 +83,55 @@ export class MySqlService implements OnModuleInit, OnModuleDestroy {
   ): Promise<T | undefined> {
     const rows = await this.call<T>(proc, params);
     return rows[0];
+  }
+
+  /**
+   * Acquire a MySQL advisory named lock on a dedicated connection, run `fn`
+   * (passing that connection so callers can run queries on the same connection
+   * as the lock), then release. Serializes any work that must not race on
+   * shared MySQL state (e.g. MAX(id)+1 allocations inside stored procedures).
+   */
+  async withNamedLock<T>(
+    name: string,
+    fn: (conn: PoolConnection) => Promise<T>,
+    timeoutSec = 10,
+  ): Promise<T> {
+    const conn = await this.pool.getConnection();
+    try {
+      const [rows] = await conn.query<RowDataPacket[]>(
+        'SELECT GET_LOCK(?, ?) AS acquired',
+        [name, timeoutSec],
+      );
+      if (!(rows[0] as { acquired: number }).acquired) {
+        throw new Error(`Failed to acquire advisory lock "${name}" within ${timeoutSec}s.`);
+      }
+      return await fn(conn);
+    } finally {
+      await conn.query('SELECT RELEASE_LOCK(?)', [name]).catch(() => {});
+      conn.release();
+    }
+  }
+
+  /** Like callOne() but uses an existing connection — required when the caller
+   *  holds a named lock that must cover the stored-procedure call. */
+  async callOneOnConn<T extends Record<string, unknown> = Record<string, unknown>>(
+    conn: PoolConnection,
+    proc: string,
+    params: ReadonlyArray<unknown> = [],
+  ): Promise<T | undefined> {
+    const placeholders = params.map(() => '?').join(', ');
+    const sql = placeholders.length === 0
+      ? `CALL ${proc}()`
+      : `CALL ${proc}(${placeholders})`;
+    const [results] = await conn.query<RowDataPacket[][] | RowDataPacket[]>(
+      sql,
+      params as unknown[],
+    );
+    if (!Array.isArray(results)) return undefined;
+    const rows = Array.isArray(results[0])
+      ? (results[0] as RowDataPacket[])
+      : (results as RowDataPacket[]);
+    return rows.map((r) => this.coerceRow(r) as T)[0];
   }
 
   private coerceRow(row: RowDataPacket): Record<string, unknown> {
