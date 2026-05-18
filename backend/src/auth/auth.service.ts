@@ -522,11 +522,11 @@ export class AuthService {
     const rows = await this.prisma.$queryRawUnsafe(
       'SELECT COALESCE(MAX(sess_code), 0) + 1 AS next_code FROM user_sessions',
     ) as Array<{ next_code: number }>;
-    const nextCode = rows[0]?.next_code;
-    if (!nextCode) {
+    const rawCode = rows[0]?.next_code;
+    if (!rawCode) {
       throw new BadRequestException('Failed to allocate session code.');
     }
-    return nextCode;
+    return Number(rawCode);
   }
 
   private async getSystem2FaEnabled(): Promise<boolean> {
