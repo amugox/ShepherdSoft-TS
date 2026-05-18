@@ -4,6 +4,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import type { Member } from '@shepherd/shared';
 
 import { memberApi } from '@/api/member';
+import BreadcrumbNav from '@/components/ui/BreadcrumbNav.vue';
 import { useToast } from '@/composables/useToast';
 import { formatDateOnly } from '@/lib/dates';
 
@@ -12,6 +13,9 @@ const toast   = useToast();
 const member  = ref<Member | null>(null);
 const loading = ref(false);
 const codeNum = computed(() => Number(props.code));
+const memberName = computed(() =>
+  member.value ? `${member.value.fname} ${member.value.onames ?? ''}`.trim() : '—',
+);
 
 const load = async (): Promise<void> => {
   loading.value = true;
@@ -25,6 +29,7 @@ watch(() => props.code, load);
 
 <template>
   <section class="space-y-4">
+    <BreadcrumbNav :items="[{ label: 'Home', to: '/' }, { label: 'Members', to: '/membership' }, { label: memberName }]" />
     <header>
       <h1 class="text-xl font-semibold text-slate-900">
         {{ member ? `${member.fname} ${member.onames ?? ''}`.trim() : '—' }}

@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 
 import BaseButton from '@/components/ui/BaseButton.vue';
+import BreadcrumbNav from '@/components/ui/BreadcrumbNav.vue';
 import { useToast } from '@/composables/useToast';
 import { isSystemAdminUser } from '@/lib/roles';
 import { authApi } from '@/api/auth';
@@ -55,6 +56,7 @@ onMounted(async () => {
 
 <template>
   <section class="space-y-6">
+    <BreadcrumbNav :items="[{ label: 'Admin', to: '/admin' }, { label: 'Security' }]" />
     <header>
       <h1 class="text-xl font-semibold text-slate-900">
         Security Settings

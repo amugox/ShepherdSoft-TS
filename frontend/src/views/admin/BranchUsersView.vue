@@ -6,10 +6,12 @@ import type { BranchAdminRecord, UserAdminRecord, UserRoleItem } from '@shepherd
 
 import { adminApi } from '@/api/admin';
 import BaseButton from '@/components/ui/BaseButton.vue';
+import BreadcrumbNav from '@/components/ui/BreadcrumbNav.vue';
 import BaseInput from '@/components/ui/BaseInput.vue';
 import BaseModal from '@/components/ui/BaseModal.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
 import DataTable from '@/components/ui/DataTable.vue';
+import DropdownMenu, { type DropdownMenuItem } from '@/components/ui/DropdownMenu.vue';
 import { useToast } from '@/composables/useToast';
 import { UserPlusIcon, MagnifyingGlassIcon, PencilSquareIcon, EnvelopeIcon, NoSymbolIcon, CheckIcon } from '@heroicons/vue/24/outline';
 
@@ -56,6 +58,18 @@ const branchOptions = computed(() => branches.value.map((b) => ({ value: b.br_co
 const selectedBranch = computed(() =>
   branches.value.find((branch) => branch.br_code === filters.value.branchCode),
 );
+
+const breadcrumb = computed(() => {
+  const base = [{ label: 'Admin', to: '/admin' }];
+  if (filters.value.branchCode > 0 && selectedBranch.value) {
+    return [
+      ...base,
+      { label: 'Branches', to: '/admin/branches' },
+      { label: selectedBranch.value.br_name },
+    ];
+  }
+  return [...base, { label: 'Branch Users' }];
+});
 
 const parseBranchCode = (value: unknown): number => {
   const raw = Array.isArray(value) ? value[0] : value;
@@ -197,6 +211,12 @@ const sendReset = async (row: UserAdminRecord): Promise<void> => {
   }
 };
 
+const rowMenuItems = (row: UserAdminRecord): DropdownMenuItem[] => [
+  { label: 'Edit', icon: PencilSquareIcon, action: () => openEdit(row) },
+  { label: 'Send reset', icon: EnvelopeIcon, action: () => sendReset(row) },
+  { label: 'Deactivate', icon: NoSymbolIcon, variant: 'danger', disabled: row.user_stat !== 0, action: () => deactivate(row) },
+];
+
 onMounted(async () => {
   try {
     await loadLookups();
@@ -219,6 +239,7 @@ watch(
 
 <template>
   <section class="space-y-4">
+    <BreadcrumbNav :items="breadcrumb" />
     <header class="flex items-center justify-between gap-4">
       <div>
         <h1 class="text-xl font-semibold text-slate-900">
@@ -292,7 +313,7 @@ watch(
         { key: 'br_name', label: 'Branch' },
         { key: 'role_name', label: 'Role', width: '140px' },
         { key: 'user_stat', label: 'Status', width: '100px' },
-        { key: 'actions', label: 'Actions', width: '250px' },
+        { key: 'actions', label: '', width: '120px' },
       ]"
       :loading="loading"
       empty-text="No users found."
@@ -303,29 +324,8 @@ watch(
         </span>
       </template>
       <template #actions="{ row }">
-        <div class="flex gap-2">
-          <BaseButton
-            variant="secondary"
-            :icon="PencilSquareIcon"
-            @click.stop="openEdit(row)"
-          >
-            Edit
-          </BaseButton>
-          <BaseButton
-            variant="secondary"
-            :icon="EnvelopeIcon"
-            @click.stop="sendReset(row)"
-          >
-            Send reset
-          </BaseButton>
-          <BaseButton
-            variant="danger"
-            :icon="NoSymbolIcon"
-            :disabled="row.user_stat !== 0"
-            @click.stop="deactivate(row)"
-          >
-            Deactivate
-          </BaseButton>
+        <div class="flex justify-end">
+          <DropdownMenu :items="rowMenuItems(row)" />
         </div>
       </template>
     </DataTable>

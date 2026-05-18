@@ -6,6 +6,7 @@ import { ListItemType, type ListItem, type MessagingRecipient } from '@shepherd/
 import { dataApi } from '@/api/data';
 import { messagingApi } from '@/api/messaging';
 import BaseButton from '@/components/ui/BaseButton.vue';
+import BreadcrumbNav from '@/components/ui/BreadcrumbNav.vue';
 import BaseTextarea from '@/components/ui/BaseTextarea.vue';
 import DataTable from '@/components/ui/DataTable.vue';
 import { useToast } from '@/composables/useToast';
@@ -92,6 +93,7 @@ const columns = [
 
 <template>
   <section class="space-y-4">
+    <BreadcrumbNav :items="[{ label: 'Home', to: '/' }, { label: 'Messaging' }]" />
     <header>
       <h1 class="text-xl font-semibold text-slate-900">
         Messaging

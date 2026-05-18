@@ -6,6 +6,7 @@ import { ArrowDownTrayIcon, UserPlusIcon } from '@heroicons/vue/24/outline';
 import type { Guest, GuestFilter } from '@shepherd/shared';
 
 import GuestFilters from '@/components/domain/guest/GuestFilters.vue';
+import BreadcrumbNav from '@/components/ui/BreadcrumbNav.vue';
 import DataTable from '@/components/ui/DataTable.vue';
 import { useToast } from '@/composables/useToast';
 import { formatDateOnly } from '@/lib/dates';
@@ -82,6 +83,7 @@ const exportCsv = (): void => {
 
 <template>
   <section class="space-y-4">
+    <BreadcrumbNav :items="[{ label: 'Home', to: '/' }, { label: 'Guests' }]" />
     <header class="flex items-center justify-between">
       <div>
         <h1 class="text-xl font-semibold text-slate-900">

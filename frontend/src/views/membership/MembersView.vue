@@ -8,6 +8,7 @@ import MemberForm from '@/components/domain/member/MemberForm.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseInput from '@/components/ui/BaseInput.vue';
 import BaseModal from '@/components/ui/BaseModal.vue';
+import BreadcrumbNav from '@/components/ui/BreadcrumbNav.vue';
 import DataTable from '@/components/ui/DataTable.vue';
 import { memberApi } from '@/api/member';
 import { useToast } from '@/composables/useToast';
@@ -69,6 +70,7 @@ const open = (m: Member): void => {
 
 <template>
   <section class="space-y-4">
+    <BreadcrumbNav :items="[{ label: 'Home', to: '/' }, { label: 'Members' }]" />
     <header class="flex items-center justify-between gap-4">
       <div>
         <h1 class="text-xl font-semibold text-slate-900">

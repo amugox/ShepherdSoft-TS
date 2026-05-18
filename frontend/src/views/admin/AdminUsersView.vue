@@ -5,6 +5,7 @@ import type { AdminUserRecord } from '@shepherd/shared';
 
 import { adminApi } from '@/api/admin';
 import BaseButton from '@/components/ui/BaseButton.vue';
+import BreadcrumbNav from '@/components/ui/BreadcrumbNav.vue';
 import BaseInput from '@/components/ui/BaseInput.vue';
 import BaseModal from '@/components/ui/BaseModal.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
@@ -173,6 +174,7 @@ onMounted(async () => {
 
 <template>
   <section class="space-y-4">
+    <BreadcrumbNav :items="[{ label: 'Admin', to: '/admin' }, { label: 'Admins' }]" />
     <header class="flex items-center justify-between gap-4">
       <div>
         <h1 class="text-xl font-semibold text-slate-900">
