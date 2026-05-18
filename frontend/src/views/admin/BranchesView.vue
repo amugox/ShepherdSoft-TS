@@ -126,7 +126,7 @@ onMounted(load);
         { key: 'br_name', label: 'Branch Name' },
         { key: 'users_count', label: 'Users', width: '100px' },
         { key: 'stat', label: 'Status', width: '110px' },
-        { key: 'actions', label: 'Actions', width: '220px' },
+        { key: 'actions', label: 'Actions', width: '320px' },
       ]"
       :loading="loading"
       empty-text="No branches found."
@@ -147,6 +147,13 @@ onMounted(load);
       </template>
       <template #actions="{ row }">
         <div class="flex gap-2">
+          <RouterLink
+            :to="{ path: '/admin/users', query: { branchCode: String(row.br_code) } }"
+            class="btn-secondary"
+            @click.stop
+          >
+            Users
+          </RouterLink>
           <BaseButton
             variant="secondary"
             :icon="PencilSquareIcon"
