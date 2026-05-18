@@ -60,7 +60,8 @@ export const useAuthStore = defineStore('auth', () => {
       window.localStorage.removeItem(STORAGE_KEY);
       resetDependentStores();
       const current = router.currentRoute.value.fullPath;
-      void router.push({ path: '/auth/login', query: { return: current } });
+      const loginPath = current.startsWith('/admin') ? '/admin/auth/login' : '/auth/login';
+      void router.push({ path: loginPath, query: { return: current } });
     });
   };
 
@@ -112,7 +113,7 @@ export const useAuthStore = defineStore('auth', () => {
     await authApi.completePasswordReset(payload);
   };
 
-  const logout = async (): Promise<void> => {
+  const logout = async (redirectTo = '/auth/login'): Promise<void> => {
     try {
       await authApi.logout();
     } catch {
@@ -123,7 +124,7 @@ export const useAuthStore = defineStore('auth', () => {
     pendingLogin.value = null;
     window.localStorage.removeItem(STORAGE_KEY);
     resetDependentStores();
-    await router.push('/auth/login');
+    await router.push(redirectTo);
   };
 
   const changePassword = async (payload: ChangePasswordPayload): Promise<void> => {
