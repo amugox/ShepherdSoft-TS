@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
 import type { BranchAdminRecord, UserAdminRecord, UserRoleItem } from '@shepherd/shared';
 
@@ -13,6 +14,7 @@ import { useToast } from '@/composables/useToast';
 import { UserPlusIcon, MagnifyingGlassIcon, PencilSquareIcon, EnvelopeIcon, NoSymbolIcon, CheckIcon } from '@heroicons/vue/24/outline';
 
 const toast = useToast();
+const route = useRoute();
 
 const loading = ref(false);
 const saving = ref(false);
@@ -51,6 +53,20 @@ const editForm = ref({
 
 const roleOptions = computed(() => roles.value.map((r) => ({ value: r.code, label: r.name })));
 const branchOptions = computed(() => branches.value.map((b) => ({ value: b.br_code, label: b.br_name })));
+const selectedBranch = computed(() =>
+  branches.value.find((branch) => branch.br_code === filters.value.branchCode),
+);
+
+const parseBranchCode = (value: unknown): number => {
+  const raw = Array.isArray(value) ? value[0] : value;
+  const parsed = Number(raw);
+
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : 0;
+};
+
+const syncBranchFilterFromRoute = (): void => {
+  filters.value.branchCode = parseBranchCode(route.query.branchCode);
+};
 
 const loadLookups = async (): Promise<void> => {
   const [roleData, branchData] = await Promise.all([
@@ -184,12 +200,21 @@ const sendReset = async (row: UserAdminRecord): Promise<void> => {
 onMounted(async () => {
   try {
     await loadLookups();
+    syncBranchFilterFromRoute();
     resetCreateForm();
     await load();
   } catch (err) {
     toast.error(err instanceof Error ? err.message : 'Failed to initialize admin users page.');
   }
 });
+
+watch(
+  () => route.query.branchCode,
+  async () => {
+    syncBranchFilterFromRoute();
+    await load();
+  },
+);
 </script>
 
 <template>
@@ -201,6 +226,12 @@ onMounted(async () => {
         </h1>
         <p class="text-sm text-slate-500">
           Manage branch users, roles, account status, and password reset flow.
+        </p>
+        <p
+          v-if="selectedBranch"
+          class="text-sm font-medium text-brand-700"
+        >
+          Showing users for {{ selectedBranch.br_name }}.
         </p>
       </div>
       <BaseButton

@@ -13,7 +13,7 @@ const isSuperAdmin = computed(() => isSystemSuperAdminUser(auth.user));
 <template>
   <aside class="flex h-full w-60 shrink-0 flex-col border-r border-slate-200 bg-white">
     <RouterLink
-      to="/"
+      to="/admin"
       class="flex h-14 items-center border-b border-slate-200 px-4 transition hover:bg-slate-50"
       aria-label="ShepherdSoft - Church Management Software"
     >
@@ -26,20 +26,12 @@ const isSuperAdmin = computed(() => isSystemSuperAdminUser(auth.user));
 
     <nav class="flex-1 overflow-y-auto py-2">
       <RouterLink
-        to="/admin/admins"
+        to="/admin"
         class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
-        active-class="!bg-brand-50 !text-brand-700 font-medium"
+        exact-active-class="!bg-brand-50 !text-brand-700 font-medium"
       >
-        <span class="w-5 text-center">🛡️</span>
-        <span>Admins</span>
-      </RouterLink>
-      <RouterLink
-        to="/admin/users"
-        class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
-        active-class="!bg-brand-50 !text-brand-700 font-medium"
-      >
-        <span class="w-5 text-center">🧑‍💼</span>
-        <span>Branch Users</span>
+        <span class="w-5 text-center">🏠</span>
+        <span>Home</span>
       </RouterLink>
       <RouterLink
         v-if="isSuperAdmin"
@@ -51,22 +43,20 @@ const isSuperAdmin = computed(() => isSystemSuperAdminUser(auth.user));
         <span>Branches</span>
       </RouterLink>
       <RouterLink
+        to="/admin/admins"
+        class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
+        active-class="!bg-brand-50 !text-brand-700 font-medium"
+      >
+        <span class="w-5 text-center">🛡️</span>
+        <span>Admins</span>
+      </RouterLink>
+      <RouterLink
         to="/admin/security"
         class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
         active-class="!bg-brand-50 !text-brand-700 font-medium"
       >
         <span class="w-5 text-center">🔐</span>
         <span>Security</span>
-      </RouterLink>
-
-      <div class="my-2 border-t border-slate-100" />
-
-      <RouterLink
-        to="/"
-        class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
-      >
-        <span class="w-5 text-center">↩️</span>
-        <span>Back to App</span>
       </RouterLink>
     </nav>
   </aside>
