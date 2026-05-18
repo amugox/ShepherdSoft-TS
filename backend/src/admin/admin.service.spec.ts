@@ -80,6 +80,34 @@ describe('AdminService', () => {
     expect(args[9]).toBe(88);
   });
 
+  it('coerces branch list user counts to numbers', async () => {
+    prisma.$queryRawUnsafe.mockResolvedValueOnce([
+      { br_code: 10, br_name: 'Main', stat: 0, users_count: 2n },
+    ]);
+
+    await expect(service.handle({
+      act: ADMIN_API_ACTION.ADMIN_BRANCH_LIST,
+      content: { includeInactive: true },
+      caller: { br_code: 0, ucode: 1, url: 'Admin', user_type: 1 },
+      ver: 1,
+    })).resolves.toEqual([
+      { br_code: 10, br_name: 'Main', stat: 0, users_count: 2 },
+    ]);
+  });
+
+  it('coerces branch detail user counts to numbers', async () => {
+    prisma.$queryRawUnsafe.mockResolvedValueOnce([
+      { br_code: 10, br_name: 'Main', stat: 0, users_count: 1n },
+    ]);
+
+    await expect(service.handle({
+      act: ADMIN_API_ACTION.ADMIN_BRANCH_GET,
+      content: { br_code: 10 },
+      caller: { br_code: 0, ucode: 1, url: 'Admin', user_type: 1 },
+      ver: 1,
+    })).resolves.toEqual({ br_code: 10, br_name: 'Main', stat: 0, users_count: 1 });
+  });
+
   it('allows branch-user creation for system admins with explicit branch', async () => {
     prisma.$queryRawUnsafe.mockResolvedValueOnce([{ next_code: 101 }]);
 

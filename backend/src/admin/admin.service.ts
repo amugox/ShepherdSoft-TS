@@ -31,6 +31,7 @@ import { rawEnvelope } from '../common/envelope/api-response';
 import { PrismaService } from '../db/prisma.service';
 
 const SYSTEM_ADMIN_USER_TYPE = 1;
+type BranchAdminRow = Omit<BranchAdminRecord, 'users_count'> & { users_count?: number | bigint | null };
 
 @Injectable()
 export class AdminService {
@@ -75,8 +76,8 @@ export class AdminService {
        GROUP BY b.br_code, b.br_name, b.stat
        ORDER BY b.br_name ASC`,
       includeInactive ? 1 : 0,
-    ) as BranchAdminRecord[];
-    return rows;
+    ) as BranchAdminRow[];
+    return rows.map((row) => this.toBranchRecord(row));
   }
 
   private async getBranch(payload: BranchAdminGetPayload | undefined, caller?: RequestHeaderDto | null): Promise<BranchAdminRecord | undefined> {
@@ -90,8 +91,8 @@ export class AdminService {
        WHERE b.br_code = ?
        GROUP BY b.br_code, b.br_name, b.stat`,
       payload.br_code,
-    ) as BranchAdminRecord[];
-    return rows[0];
+    ) as BranchAdminRow[];
+    return rows[0] ? this.toBranchRecord(rows[0]) : undefined;
   }
 
   private async createBranch(payload: BranchAdminCreatePayload | undefined, caller?: RequestHeaderDto | null): Promise<unknown> {
@@ -504,5 +505,14 @@ export class AdminService {
         log_msg: `actor=${actorCode};target=${targetCode};${message}`,
       },
     });
+  }
+
+  private toBranchRecord(row: BranchAdminRow): BranchAdminRecord {
+    return {
+      ...row,
+      ...(row.users_count === undefined || row.users_count === null
+        ? {}
+        : { users_count: Number(row.users_count) }),
+    };
   }
 }
