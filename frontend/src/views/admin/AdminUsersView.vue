@@ -11,6 +11,7 @@ import BaseModal from '@/components/ui/BaseModal.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
 import DataTable from '@/components/ui/DataTable.vue';
 import DropdownMenu, { type DropdownMenuItem } from '@/components/ui/DropdownMenu.vue';
+import { usePagination } from '@/composables/usePagination';
 import { useToast } from '@/composables/useToast';
 import { isSystemSuperAdminUser } from '@/lib/roles';
 import { useAuthStore } from '@/stores/auth';
@@ -25,6 +26,10 @@ const loading = ref(false);
 const saving = ref(false);
 
 const admins = ref<AdminUserRecord[]>([]);
+const pg = usePagination();
+const displayedRows = computed(() =>
+  admins.value.slice((pg.page.value - 1) * pg.pageSize.value, pg.page.value * pg.pageSize.value),
+);
 const roleOptions = [
   { value: 1, label: 'Admin' },
   { value: 0, label: 'Super Admin' },
@@ -63,6 +68,8 @@ const load = async (): Promise<void> => {
       searchText: filters.value.searchText.trim(),
       includeInactive: filters.value.includeInactive,
     })) ?? [];
+    pg.reset();
+    pg.total.value = admins.value.length;
   } catch (err) {
     toast.error(err instanceof Error ? err.message : 'Failed to load admins.');
   } finally {
@@ -163,6 +170,9 @@ const sendReset = async (row: AdminUserRecord): Promise<void> => {
   }
 };
 
+const onPage = (p: number): void => { pg.page.value = p; };
+const onPageSize = (size: number): void => { pg.pageSize.value = size; pg.page.value = 1; };
+
 const rowMenuItems = (row: AdminUserRecord): DropdownMenuItem[] => [
   { label: 'Edit', icon: PencilSquareIcon, action: () => openEdit(row) },
   { label: 'Send reset', icon: EnvelopeIcon, action: () => sendReset(row) },
@@ -228,7 +238,7 @@ onMounted(async () => {
     </label>
 
     <DataTable
-      :rows="admins"
+      :rows="displayedRows"
       :columns="[
         { key: 'user_name', label: 'Username' },
         { key: 'full_names', label: 'Name' },
@@ -239,7 +249,12 @@ onMounted(async () => {
         { key: 'actions', label: '', width: '120px' },
       ]"
       :loading="loading"
+      :total="pg.total.value"
+      :page="pg.page.value"
+      :page-size="pg.pageSize.value"
       empty-text="No admins found."
+      @update:page="onPage"
+      @update:page-size="onPageSize"
     >
       <template #user_stat="{ row }">
         <span :class="row.user_stat === 0 ? 'text-emerald-700' : 'text-rose-700'">

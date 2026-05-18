@@ -11,6 +11,7 @@ import BaseInput from '@/components/ui/BaseInput.vue';
 import BaseModal from '@/components/ui/BaseModal.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
 import DataTable from '@/components/ui/DataTable.vue';
+import { usePagination } from '@/composables/usePagination';
 import { useToast } from '@/composables/useToast';
 import { isSystemSuperAdminUser } from '@/lib/roles';
 import { useAuthStore } from '@/stores/auth';
@@ -23,6 +24,10 @@ const isSuperAdmin = computed(() => isSystemSuperAdminUser(auth.user));
 const loading = ref(false);
 const saving = ref(false);
 const branches = ref<BranchAdminRecord[]>([]);
+const pg = usePagination();
+const displayedRows = computed(() =>
+  branches.value.slice((pg.page.value - 1) * pg.pageSize.value, pg.page.value * pg.pageSize.value),
+);
 
 const createOpen = ref(false);
 const editOpen = ref(false);
@@ -34,6 +39,8 @@ const load = async (): Promise<void> => {
   loading.value = true;
   try {
     branches.value = (await adminApi.listBranches({ includeInactive: true })) ?? [];
+    pg.reset();
+    pg.total.value = branches.value.length;
   } catch (err) {
     toast.error(err instanceof Error ? err.message : 'Failed to load branches.');
   } finally {
@@ -97,6 +104,9 @@ const deactivate = async (row: BranchAdminRecord): Promise<void> => {
   }
 };
 
+const onPage = (p: number): void => { pg.page.value = p; };
+const onPageSize = (size: number): void => { pg.pageSize.value = size; pg.page.value = 1; };
+
 onMounted(load);
 </script>
 
@@ -122,7 +132,7 @@ onMounted(load);
     </header>
 
     <DataTable
-      :rows="branches"
+      :rows="displayedRows"
       :columns="[
         { key: 'br_code', label: 'Code', width: '90px' },
         { key: 'br_name', label: 'Branch Name' },
@@ -131,7 +141,12 @@ onMounted(load);
         { key: 'actions', label: 'Actions', width: '320px' },
       ]"
       :loading="loading"
+      :total="pg.total.value"
+      :page="pg.page.value"
+      :page-size="pg.pageSize.value"
       empty-text="No branches found."
+      @update:page="onPage"
+      @update:page-size="onPageSize"
     >
       <template #stat="{ row }">
         <span :class="row.stat === 0 ? 'text-emerald-700' : 'text-rose-700'">
