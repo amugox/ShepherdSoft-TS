@@ -8,8 +8,6 @@ import { usePagination } from '@/composables/usePagination';
 
 export const useGuestStore = defineStore('guest', () => {
   const guests     = ref<Guest[]>([]);
-  const total      = ref(0);
-  const currentPage = ref(1);
   const stats      = ref<GuestStats | null>(null);
   const followUps  = ref<GuestFollowUp[]>([]);
   const loading    = ref(false);
@@ -26,12 +24,6 @@ export const useGuestStore = defineStore('guest', () => {
     }
     loading.value = true;
     try {
-<<<<<<< HEAD
-      const result = await guestApi.find(filter.value);
-      guests.value      = result?.items     ?? [];
-      total.value       = result?.total     ?? 0;
-      currentPage.value = result?.page      ?? 1;
-=======
       const result = await guestApi.find({
         ...filter.value,
         page: guestsPg.page.value,
@@ -39,15 +31,9 @@ export const useGuestStore = defineStore('guest', () => {
       });
       guests.value = result?.rows ?? [];
       guestsPg.total.value = result?.total ?? 0;
->>>>>>> a7445f1 (feat: add server-side pagination to DataTable list views)
     } finally {
       loading.value = false;
     }
-  };
-
-  const loadPage = async (page: number): Promise<void> => {
-    filter.value = { ...filter.value, page };
-    await find();
   };
 
   const loadStats = async (): Promise<void> => {
@@ -71,20 +57,6 @@ export const useGuestStore = defineStore('guest', () => {
   };
 
   const reset = (): void => {
-<<<<<<< HEAD
-    guests.value      = [];
-    total.value       = 0;
-    currentPage.value = 1;
-    stats.value       = null;
-    followUps.value   = [];
-    loading.value     = false;
-    filter.value      = {};
-  };
-
-  return {
-    guests, total, currentPage, stats, followUps, loading, filter,
-    find, loadPage, loadStats, loadFollowUps, reset,
-=======
     guests.value = [];
     stats.value = null;
     followUps.value = [];
@@ -110,6 +82,5 @@ export const useGuestStore = defineStore('guest', () => {
     loadStats,
     loadFollowUps,
     reset,
->>>>>>> a7445f1 (feat: add server-side pagination to DataTable list views)
   };
 });

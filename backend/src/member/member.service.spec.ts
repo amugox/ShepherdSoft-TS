@@ -29,7 +29,7 @@ describe('MemberService branch isolation', () => {
       caller: { br_code: 10, url: 'Admin' },
     } as unknown as MemberRequest);
 
-    expect(sp.findMembers).toHaveBeenCalledWith('john', 10);
+    expect(sp.findMembers).toHaveBeenCalledWith({ stxt: 'john' }, 10);
   });
 
   it('scopes family find to caller branch for non-super-admin', async () => {
@@ -39,7 +39,7 @@ describe('MemberService branch isolation', () => {
       caller: { br_code: 22, url: 'Admin' },
     } as unknown as MemberRequest);
 
-    expect(sp.findFamilies).toHaveBeenCalledWith('fam', 22);
+    expect(sp.findFamilies).toHaveBeenCalledWith({ stxt: 'fam' }, 22);
   });
 
   it('allows cross-branch member get for super-admin', async () => {

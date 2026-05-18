@@ -90,7 +90,7 @@ describe('GuestService branch isolation', () => {
       caller: { br_code: 7, url: 'Admin' },
     } as unknown as GuestRequest);
 
-    expect(followups.findPending).toHaveBeenCalledWith(7);
+    expect(followups.findPending).toHaveBeenCalledWith({ code: 0 }, 7);
   });
 
   it('scopes guest update to caller branch for non-super-admin', async () => {

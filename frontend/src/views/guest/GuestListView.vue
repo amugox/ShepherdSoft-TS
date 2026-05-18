@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { ArrowDownTrayIcon, UserPlusIcon } from '@heroicons/vue/24/outline';
 
@@ -16,9 +16,6 @@ const router = useRouter();
 const toast  = useToast();
 const filter = ref<GuestFilter>({});
 
-const pageSize = 100;
-const totalPages = computed(() => Math.max(1, Math.ceil(guest.total / pageSize)));
-
 const columns = [
   { key: 'vdt',      label: 'Visit', width: '110px' },
   { key: 'fname',    label: 'Name' },
@@ -28,23 +25,13 @@ const columns = [
   { key: 'sstage',   label: 'Stage', align: 'center' as const, width: '90px' },
 ];
 
-<<<<<<< HEAD
-const refresh = async (): Promise<void> => {
-  try { await guest.find({ ...filter.value, page: 1, page_size: pageSize }); }
-=======
 const load = async (applyFilter: boolean): Promise<void> => {
   try { await guest.find(applyFilter ? filter.value : undefined); }
->>>>>>> a7445f1 (feat: add server-side pagination to DataTable list views)
   catch (err) { toast.error(err instanceof Error ? err.message : 'Failed to load.'); }
 };
 const refresh = (): Promise<void> => load(true);
 onMounted(refresh);
 
-<<<<<<< HEAD
-const goToPage = async (page: number): Promise<void> => {
-  try { await guest.find({ ...filter.value, page, page_size: pageSize }); }
-  catch (err) { toast.error(err instanceof Error ? err.message : 'Failed.'); }
-=======
 const onPage = (p: number): void => {
   guest.guestsPage = p;
   void load(false);
@@ -53,7 +40,6 @@ const onPageSize = (size: number): void => {
   guest.guestsPageSize = size;
   guest.guestsPage = 1;
   void load(false);
->>>>>>> a7445f1 (feat: add server-side pagination to DataTable list views)
 };
 
 const openGuest = (row: Guest): void => {
@@ -88,7 +74,7 @@ const exportCsv = (): void => {
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href     = url;
-  a.download = `guests-page-${guest.currentPage}.csv`;
+  a.download = `guests-page-${guest.guestsPage}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 };
@@ -104,9 +90,9 @@ const exportCsv = (): void => {
         <p class="text-sm text-slate-500">
           All visitors and their visit history.
           <span
-            v-if="guest.total > 0"
+            v-if="guest.guestsTotal > 0"
             class="ml-1 font-medium text-slate-700"
-          >{{ guest.total }} total</span>
+          >{{ guest.guestsTotal }} total</span>
         </p>
       </div>
       <div class="flex gap-2">
@@ -164,31 +150,5 @@ const exportCsv = (): void => {
         >Joining</span>
       </template>
     </DataTable>
-
-    <!-- Pagination -->
-    <div
-      v-if="totalPages > 1"
-      class="flex items-center justify-between text-sm"
-    >
-      <span class="text-slate-500">
-        Page {{ guest.currentPage }} of {{ totalPages }}
-      </span>
-      <div class="flex gap-1">
-        <button
-          class="btn-secondary"
-          :disabled="guest.currentPage <= 1"
-          @click="goToPage(guest.currentPage - 1)"
-        >
-          ← Prev
-        </button>
-        <button
-          class="btn-secondary"
-          :disabled="guest.currentPage >= totalPages"
-          @click="goToPage(guest.currentPage + 1)"
-        >
-          Next →
-        </button>
-      </div>
-    </div>
   </section>
 </template>

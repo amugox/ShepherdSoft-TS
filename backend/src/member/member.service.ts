@@ -30,14 +30,9 @@ export class MemberService {
     return dispatch(req, handlers);
   }
 
-<<<<<<< HEAD
   private async find(p?: SearchPayload, caller?: RequestHeaderDto | null): Promise<unknown> {
     const branchCode = this.readBranchScope(caller);
-    return this.sp.findMembers(p?.stxt ?? '', branchCode);
-=======
-  private async find(p?: SearchPayload): Promise<unknown> {
-    return this.sp.findMembers(p);
->>>>>>> a7445f1 (feat: add server-side pagination to DataTable list views)
+    return this.sp.findMembers(p, branchCode);
   }
 
   private async get(p?: SearchPayload, caller?: RequestHeaderDto | null): Promise<unknown> {
@@ -75,10 +70,9 @@ export class MemberService {
     return this.sp.getFamily(p.code, branchCode);
   }
 
-<<<<<<< HEAD
   private async findFamilies(p?: SearchPayload, caller?: RequestHeaderDto | null): Promise<unknown> {
     const branchCode = this.readBranchScope(caller);
-    return this.sp.findFamilies(p?.stxt ?? '', branchCode);
+    return this.sp.findFamilies(p, branchCode);
   }
 
   private readBranchScope(caller?: RequestHeaderDto | null): number | undefined {
@@ -91,9 +85,5 @@ export class MemberService {
   private isSuperAdmin(role: string | undefined): boolean {
     const normalized = (role ?? '').trim().toLowerCase();
     return normalized === '0' || normalized.includes('super');
-=======
-  private async findFamilies(p?: SearchPayload): Promise<unknown> {
-    return this.sp.findFamilies(p);
->>>>>>> a7445f1 (feat: add server-side pagination to DataTable list views)
   }
 }
