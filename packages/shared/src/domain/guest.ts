@@ -70,6 +70,7 @@ export interface Guest {
   promoted?: boolean;
   visit_count?: number;
   grp_name?: string;
+  member_code?: number | null;
 }
 
 /** GuestFilterModel — already short-keyed in ApiModels.cs. */
@@ -78,6 +79,12 @@ export interface GuestFilter {
   vtype?: number | null;
   sstage?: number | null;
   fu_stat?: number | null;
+  vdt_from?: string | null;
+  vdt_to?: string | null;
+  heard?: number | null;
+  ba?: number | null;
+  page?: number;
+  page_size?: number;
 }
 
 /** GuestFollowUpModel — short-keyed payload for GUEST_FOLLOWUP_ADD. */
@@ -96,6 +103,13 @@ export interface GuestFollowUpCompletePayload {
   outcome?: string;
 }
 
+/** GuestFollowUpRescheduleModel — payload for GUEST_FOLLOWUP_RESCHEDULE. */
+export interface GuestFollowUpReschedulePayload {
+  code: number;
+  fdt: string;
+  assigned_to?: number;
+}
+
 /** GuestPromoteModel — payload for GUEST_PROMOTE. */
 export interface GuestPromotePayload {
   g_code: number;
@@ -112,6 +126,16 @@ export interface GuestStats {
   pending_fu: number;
   overdue_fu: number;
   promoted_mo: number;
+  response_rate: number;
+  conversion_rate: number;
+}
+
+/** Paged result returned by GUEST_FIND. */
+export interface GuestPagedResult {
+  items: Guest[];
+  total: number;
+  page: number;
+  page_size: number;
 }
 
 /**

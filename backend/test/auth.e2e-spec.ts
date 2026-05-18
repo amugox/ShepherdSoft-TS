@@ -138,4 +138,46 @@ describe('AuthController (e2e)', () => {
       .expect(200);
     expect(revert.body.stat).toBe(0);
   });
+
+  it('AUTH_GET/SET_SYSTEM_2FA round-trips as a global setting', async () => {
+    const loginRes = await request(app.getHttpServer())
+      .post('/api/v1/auth/login')
+      .send(envelope(0, { Username: 'Admin1', Password: 'Test@123', BranchCode: 10 }))
+      .expect(200);
+    const auth = authFromLogin(loginRes.headers['set-cookie']);
+
+    const current = await request(app.getHttpServer())
+      .post('/api/v1/auth/service')
+      .set('Cookie', auth.cookieHeader)
+      .set('BS-XSRF-TOKEN', auth.csrfToken)
+      .send(envelope(102))
+      .expect(200);
+    expect(current.body.stat).toBe(0);
+    expect(typeof current.body.data?.enabled).toBe('boolean');
+
+    const original = Boolean(current.body.data.enabled);
+    const toggled = !original;
+
+    await request(app.getHttpServer())
+      .post('/api/v1/auth/service')
+      .set('Cookie', auth.cookieHeader)
+      .set('BS-XSRF-TOKEN', auth.csrfToken)
+      .send(envelope(103, { enabled: toggled }))
+      .expect(200);
+
+    const after = await request(app.getHttpServer())
+      .post('/api/v1/auth/service')
+      .set('Cookie', auth.cookieHeader)
+      .set('BS-XSRF-TOKEN', auth.csrfToken)
+      .send(envelope(102))
+      .expect(200);
+    expect(after.body.data?.enabled).toBe(toggled);
+
+    await request(app.getHttpServer())
+      .post('/api/v1/auth/service')
+      .set('Cookie', auth.cookieHeader)
+      .set('BS-XSRF-TOKEN', auth.csrfToken)
+      .send(envelope(103, { enabled: original }))
+      .expect(200);
+  });
 });

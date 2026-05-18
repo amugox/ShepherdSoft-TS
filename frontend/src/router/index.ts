@@ -30,6 +30,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: '', name: 'home', component: () => import('@/views/HomeView.vue') },
       { path: 'privacy', name: 'privacy', component: () => import('@/views/PrivacyView.vue') },
+      { path: 'profile', name: 'profile', component: () => import('@/views/profile/ProfileView.vue') },
       {
         path: 'guest',
         children: [
@@ -51,6 +52,40 @@ const routes: RouteRecordRaw[] = [
         ],
       },
       { path: 'messaging', name: 'messaging', component: () => import('@/views/messaging/MessagingView.vue') },
+      { path: 'settings/security', redirect: '/admin/security' },
+      { path: 'settings/users', redirect: '/admin/users' },
+    ],
+  },
+  {
+    path: '/admin',
+    component: () => import('@/layouts/AdminLayout.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true },
+    children: [
+      { path: '', redirect: '/admin/users' },
+      {
+        path: 'admins',
+        name: 'admin-admins',
+        meta: { requiresAdmin: true },
+        component: () => import('@/views/admin/AdminUsersView.vue'),
+      },
+      {
+        path: 'users',
+        name: 'admin-users',
+        meta: { requiresAdmin: true },
+        component: () => import('@/views/admin/BranchUsersView.vue'),
+      },
+      {
+        path: 'branches',
+        name: 'admin-branches',
+        meta: { requiresAdmin: true, requiresSuperAdmin: true },
+        component: () => import('@/views/admin/BranchesView.vue'),
+      },
+      {
+        path: 'security',
+        name: 'admin-security',
+        meta: { requiresAdmin: true },
+        component: () => import('@/views/settings/SecurityView.vue'),
+      },
     ],
   },
   { path: '/:pathMatch(.*)*', redirect: '/' },

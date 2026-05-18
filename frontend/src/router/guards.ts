@@ -1,5 +1,6 @@
 import type { NavigationGuardWithThis, RouteLocationNormalized } from 'vue-router';
 
+import { isAdminRole, isSuperAdminRole } from '@/lib/roles';
 import { useAuthStore } from '@/stores/auth';
 
 declare module 'vue-router' {
@@ -8,6 +9,10 @@ declare module 'vue-router' {
     requiresAuth?: boolean;
     /** Set to true on routes that should bounce *away* if already logged in (login page). */
     publicOnly?: boolean;
+    /** Restrict route to admin/super-admin users. */
+    requiresAdmin?: boolean;
+    /** Restrict route to super-admin users only. */
+    requiresSuperAdmin?: boolean;
   }
 }
 
@@ -24,6 +29,12 @@ export const globalAuthGuard: NavigationGuardWithThis<undefined> = (
   const requiresAuth = to.meta.requiresAuth ?? true;
   if (requiresAuth && !auth.isAuthenticated) {
     return { path: '/auth/login', query: { return: to.fullPath } };
+  }
+  if (to.meta.requiresAdmin) {
+    if (!isAdminRole(auth.user?.role)) return { path: '/' };
+  }
+  if (to.meta.requiresSuperAdmin) {
+    if (!isSuperAdminRole(auth.user?.role)) return { path: '/' };
   }
   return true;
 };

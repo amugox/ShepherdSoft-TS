@@ -9,6 +9,7 @@ import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseTextarea from '@/components/ui/BaseTextarea.vue';
 import DataTable from '@/components/ui/DataTable.vue';
 import { useToast } from '@/composables/useToast';
+import { EyeIcon, PaperAirplaneIcon } from '@heroicons/vue/24/outline';
 
 const toast = useToast();
 const loading = ref(false);
@@ -148,12 +149,14 @@ const columns = [
       <div class="flex flex-wrap gap-2">
         <BaseButton
           variant="secondary"
+          :icon="EyeIcon"
           :loading="loading"
           @click="preview"
         >
           Preview recipients
         </BaseButton>
         <BaseButton
+          :icon="PaperAirplaneIcon"
           :loading="sending"
           @click="sendSms"
         >

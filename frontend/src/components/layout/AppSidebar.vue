@@ -3,6 +3,8 @@ import { computed, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 
 import BrandLogo from '@/components/brand/BrandLogo.vue';
+import { isAdminRole } from '@/lib/roles';
+import { useAuthStore } from '@/stores/auth';
 
 interface NavLinkItem {
   type: 'link';
@@ -27,7 +29,7 @@ interface NavGroupItem {
 
 type NavItem = NavLinkItem | NavGroupItem;
 
-const items: NavItem[] = [
+const baseItems: NavItem[] = [
   { type: 'link', to: '/', label: 'Dashboard', icon: '🏠' },
   {
     type: 'group',
@@ -57,10 +59,18 @@ const items: NavItem[] = [
   { type: 'link', to: '/messaging', label: 'Messaging', icon: '💬' },
 ];
 
+const auth = useAuthStore();
 const route = useRoute();
 const openGroups = ref<Record<string, boolean>>({});
+const isAdmin = computed(() => isAdminRole(auth.user?.role));
+const items = computed<NavItem[]>(() => [
+  ...baseItems,
+  ...(isAdmin.value
+    ? [{ type: 'link', to: '/admin', label: 'Admin', icon: '🛠️' } satisfies NavLinkItem]
+    : []),
+]);
 
-const groupedItems = computed(() => items.filter((item): item is NavGroupItem => item.type === 'group'));
+const groupedItems = computed(() => items.value.filter((item): item is NavGroupItem => item.type === 'group'));
 
 const isPathActive = (path: string) => route.path === path || route.path.startsWith(`${path}/`);
 

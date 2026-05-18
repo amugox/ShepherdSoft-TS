@@ -11,7 +11,9 @@ import BaseModal from '@/components/ui/BaseModal.vue';
 import DataTable from '@/components/ui/DataTable.vue';
 import { memberApi } from '@/api/member';
 import { useToast } from '@/composables/useToast';
+import { formatDateOnly } from '@/lib/dates';
 import { useMemberStore } from '@/stores/member';
+import { UserPlusIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
 
 const memberStore = useMemberStore();
 const toast       = useToast();
@@ -65,8 +67,11 @@ const open = (m: Member): void => {
           Registered members across your branch.
         </p>
       </div>
-      <BaseButton @click="addOpen = true">
-        + Add member
+      <BaseButton
+        :icon="UserPlusIcon"
+        @click="addOpen = true"
+      >
+        Add member
       </BaseButton>
     </header>
 
@@ -83,6 +88,7 @@ const open = (m: Member): void => {
       <BaseButton
         variant="secondary"
         type="submit"
+        :icon="MagnifyingGlassIcon"
       >
         Search
       </BaseButton>
@@ -95,6 +101,9 @@ const open = (m: Member): void => {
       empty-text="No members found."
       @row-click="open"
     >
+      <template #jdt="{ value }">
+        {{ formatDateOnly(value as string) }}
+      </template>
       <template #fname="{ row }">
         <span class="font-medium text-slate-900">{{ row.fname }} {{ row.onames ?? '' }}</span>
       </template>

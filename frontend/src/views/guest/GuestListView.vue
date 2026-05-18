@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { ArrowDownTrayIcon, UserPlusIcon } from '@heroicons/vue/24/outline';
 
 import type { Guest, GuestFilter } from '@shepherd/shared';
 
 import GuestFilters from '@/components/domain/guest/GuestFilters.vue';
 import DataTable from '@/components/ui/DataTable.vue';
 import { useToast } from '@/composables/useToast';
+import { formatDateOnly } from '@/lib/dates';
 import { useGuestStore } from '@/stores/guest';
 
 const guest  = useGuestStore();
@@ -14,8 +16,11 @@ const router = useRouter();
 const toast  = useToast();
 const filter = ref<GuestFilter>({});
 
+const pageSize = 100;
+const totalPages = computed(() => Math.max(1, Math.ceil(guest.total / pageSize)));
+
 const columns = [
-  { key: 'vdt',      label: 'Visit', width: '120px' },
+  { key: 'vdt',      label: 'Visit', width: '110px' },
   { key: 'fname',    label: 'Name' },
   { key: 'pno',      label: 'Phone' },
   { key: 'grp_name', label: 'Group' },
@@ -24,13 +29,51 @@ const columns = [
 ];
 
 const refresh = async (): Promise<void> => {
-  try { await guest.find(filter.value); }
+  try { await guest.find({ ...filter.value, page: 1, page_size: pageSize }); }
   catch (err) { toast.error(err instanceof Error ? err.message : 'Failed to load.'); }
 };
 onMounted(refresh);
 
+const goToPage = async (page: number): Promise<void> => {
+  try { await guest.find({ ...filter.value, page, page_size: pageSize }); }
+  catch (err) { toast.error(err instanceof Error ? err.message : 'Failed.'); }
+};
+
 const openGuest = (row: Guest): void => {
   if (row.code) void router.push(`/guest/${row.code}`);
+};
+
+const exportCsv = (): void => {
+  const rows = guest.guests;
+  if (!rows.length) return;
+  const headers = ['Code', 'First Name', 'Other Names', 'Phone', 'Email', 'Visit Date', 'Visit Type', 'Spiritual Stage', 'Born Again', 'Location', 'Group', 'Branch', 'Heard Via'];
+  const lines = [
+    headers.join(','),
+    ...rows.map((r) =>
+      [
+        r.code ?? '',
+        r.fname,
+        r.onames ?? '',
+        r.pno ?? '',
+        r.email ?? '',
+        r.vdt ?? '',
+        r.vtype ?? '',
+        r.sstage ?? '',
+        r.ba ?? '',
+        r.padd ?? '',
+        r.grp_name ?? '',
+        r.br_name ?? '',
+        r.heard ?? '',
+      ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','),
+    ),
+  ];
+  const blob = new Blob([lines.join('\r\n')], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `guests-page-${guest.currentPage}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 };
 </script>
 
@@ -43,14 +86,29 @@ const openGuest = (row: Guest): void => {
         </h1>
         <p class="text-sm text-slate-500">
           All visitors and their visit history.
+          <span
+            v-if="guest.total > 0"
+            class="ml-1 font-medium text-slate-700"
+          >{{ guest.total }} total</span>
         </p>
       </div>
-      <RouterLink
-        to="/guest/register"
-        class="btn-primary"
-      >
-        + Register guest
-      </RouterLink>
+      <div class="flex gap-2">
+        <button
+          class="btn-secondary"
+          :disabled="guest.guests.length === 0"
+          @click="exportCsv"
+        >
+          <ArrowDownTrayIcon class="h-4 w-4 shrink-0" />
+          Export CSV
+        </button>
+        <RouterLink
+          to="/guest/register"
+          class="btn-primary"
+        >
+          <UserPlusIcon class="h-4 w-4 shrink-0" />
+          Register guest
+        </RouterLink>
+      </div>
     </header>
 
     <GuestFilters
@@ -65,6 +123,9 @@ const openGuest = (row: Guest): void => {
       empty-text="No guests match the current filter."
       @row-click="openGuest"
     >
+      <template #vdt="{ value }">
+        {{ formatDateOnly(value as string) }}
+      </template>
       <template #fname="{ row }">
         <span class="font-medium text-slate-900">
           {{ row.fname }} {{ row.onames ?? '' }}
@@ -81,5 +142,31 @@ const openGuest = (row: Guest): void => {
         >Joining</span>
       </template>
     </DataTable>
+
+    <!-- Pagination -->
+    <div
+      v-if="totalPages > 1"
+      class="flex items-center justify-between text-sm"
+    >
+      <span class="text-slate-500">
+        Page {{ guest.currentPage }} of {{ totalPages }}
+      </span>
+      <div class="flex gap-1">
+        <button
+          class="btn-secondary"
+          :disabled="guest.currentPage <= 1"
+          @click="goToPage(guest.currentPage - 1)"
+        >
+          ← Prev
+        </button>
+        <button
+          class="btn-secondary"
+          :disabled="guest.currentPage >= totalPages"
+          @click="goToPage(guest.currentPage + 1)"
+        >
+          Next →
+        </button>
+      </div>
+    </div>
   </section>
 </template>

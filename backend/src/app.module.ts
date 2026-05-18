@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
+import { AdminModule } from './admin/admin.module';
 import { AuthModule } from './auth/auth.module';
 import { CsrfGuard } from './common/guards/csrf.guard';
 import { configuration } from './config/configuration';
@@ -14,6 +15,7 @@ import { LoggingModule } from './logging/logging.module';
 import { MailModule } from './mail/mail.module';
 import { MemberModule } from './member/member.module';
 import { MessagingModule } from './messaging/messaging.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -29,10 +31,12 @@ import { MessagingModule } from './messaging/messaging.module';
     PrismaModule,
     MailModule,
     AuthModule,
+    AdminModule,
     DataModule,
     GuestModule,
     MemberModule,
     MessagingModule,
+    UserModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
