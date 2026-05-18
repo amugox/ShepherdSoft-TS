@@ -12,7 +12,10 @@ import BaseModal from '@/components/ui/BaseModal.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
 import DataTable from '@/components/ui/DataTable.vue';
 import DropdownMenu, { type DropdownMenuItem } from '@/components/ui/DropdownMenu.vue';
+import { usePagination } from '@/composables/usePagination';
 import { useToast } from '@/composables/useToast';
+import { useZodForm } from '@/composables/useZodForm';
+import { branchUserCreateSchema } from '@/lib/validation/schemas';
 import { UserPlusIcon, MagnifyingGlassIcon, PencilSquareIcon, EnvelopeIcon, NoSymbolIcon, CheckIcon } from '@heroicons/vue/24/outline';
 
 const toast = useToast();
@@ -22,6 +25,10 @@ const loading = ref(false);
 const saving = ref(false);
 
 const users = ref<UserAdminRecord[]>([]);
+const pg = usePagination();
+const displayedRows = computed(() =>
+  users.value.slice((pg.page.value - 1) * pg.pageSize.value, pg.page.value * pg.pageSize.value),
+);
 const roles = ref<UserRoleItem[]>([]);
 const branches = ref<BranchAdminRecord[]>([]);
 
@@ -101,12 +108,17 @@ const load = async (): Promise<void> => {
       roleCode: filters.value.roleCode > 0 ? filters.value.roleCode : undefined,
       includeInactive: filters.value.includeInactive,
     })) ?? [];
+    pg.reset();
+    pg.total.value = users.value.length;
   } catch (err) {
     toast.error(err instanceof Error ? err.message : 'Failed to load branch users.');
   } finally {
     loading.value = false;
   }
 };
+
+const { errors: createErrors, validate: validateCreate, clearErrors: clearCreateErrors } =
+  useZodForm(branchUserCreateSchema);
 
 const resetCreateForm = (): void => {
   createForm.value = {
@@ -117,6 +129,7 @@ const resetCreateForm = (): void => {
     user_role: null,
     sendReset: true,
   };
+  clearCreateErrors();
 };
 
 const openCreate = (): void => {
@@ -138,14 +151,14 @@ const openEdit = (row: UserAdminRecord): void => {
 
 const submitCreate = async (): Promise<void> => {
   const branchCode = scopedBranchCode.value ?? createForm.value.br_code;
-  if (
-    !createForm.value.user_name
-    || !createForm.value.member_code
-    || !createForm.value.email
-    || createForm.value.user_role === null
-    || !branchCode
-  ) {
-    toast.warning('Fill all required fields.');
+  const valid = validateCreate({
+    user_name: createForm.value.user_name,
+    member_code: createForm.value.member_code,
+    email: createForm.value.email,
+  });
+  if (!valid) return;
+  if (!branchCode || createForm.value.user_role === null) {
+    toast.warning('Select a branch and a role.');
     return;
   }
   saving.value = true;
@@ -217,6 +230,9 @@ const sendReset = async (row: UserAdminRecord): Promise<void> => {
     toast.error(err instanceof Error ? err.message : 'Failed to send reset code.');
   }
 };
+
+const onPage = (p: number): void => { pg.page.value = p; };
+const onPageSize = (size: number): void => { pg.pageSize.value = size; pg.page.value = 1; };
 
 const rowMenuItems = (row: UserAdminRecord): DropdownMenuItem[] => [
   { label: 'Edit', icon: PencilSquareIcon, action: () => openEdit(row) },
@@ -312,7 +328,7 @@ watch(
     </label>
 
     <DataTable
-      :rows="users"
+      :rows="displayedRows"
       :columns="[
         { key: 'user_name', label: 'Username' },
         { key: 'full_name', label: 'Name' },
@@ -323,7 +339,12 @@ watch(
         { key: 'actions', label: '', width: '120px' },
       ]"
       :loading="loading"
+      :total="pg.total.value"
+      :page="pg.page.value"
+      :page-size="pg.pageSize.value"
       empty-text="No users found."
+      @update:page="onPage"
+      @update:page-size="onPageSize"
     >
       <template #user_stat="{ row }">
         <span :class="row.user_stat === 0 ? 'text-emerald-700' : 'text-rose-700'">
@@ -360,17 +381,20 @@ watch(
           v-model="createForm.user_name"
           label="Username"
           required
+          :error="createErrors.user_name"
         />
         <BaseInput
           v-model="createForm.member_code"
           label="Member code"
           required
+          :error="createErrors.member_code"
         />
         <BaseInput
           v-model="createForm.email"
           type="email"
           label="Email"
           required
+          :error="createErrors.email"
         />
         <BaseSelect
           v-model="createForm.user_role"
