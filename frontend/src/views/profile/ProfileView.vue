@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 import type { UserProfileData } from '@shepherd/shared';
 
@@ -8,11 +8,13 @@ import BaseInput from '@/components/ui/BaseInput.vue';
 import { useToast } from '@/composables/useToast';
 import { authApi } from '@/api/auth';
 import { formatDateTime } from '@/lib/dates';
+import { isSystemAdminUser } from '@/lib/roles';
 import { useAuthStore } from '@/stores/auth';
 import { KeyIcon } from '@heroicons/vue/24/outline';
 
 const auth = useAuthStore();
 const toast = useToast();
+const isSystemAdmin = computed(() => isSystemAdminUser(auth.user));
 
 // — Profile data —
 const profile = ref<UserProfileData | null>(null);
@@ -133,7 +135,16 @@ onMounted(async () => {
             </dd>
           </div>
 
-          <div>
+          <div v-if="isSystemAdmin">
+            <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Access Scope
+            </dt>
+            <dd class="mt-1 text-sm text-slate-900">
+              System Administration
+            </dd>
+          </div>
+
+          <div v-else>
             <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
               Branch
             </dt>

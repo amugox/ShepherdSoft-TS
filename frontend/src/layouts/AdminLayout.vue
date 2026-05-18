@@ -10,7 +10,7 @@ import BaseToast from '@/components/ui/BaseToast.vue';
   <div class="flex h-screen w-screen overflow-hidden">
     <AdminSidebar />
     <div class="flex min-w-0 flex-1 flex-col">
-      <AppTopbar />
+      <AppTopbar context="admin" />
       <main class="flex-1 overflow-y-auto bg-bg-neutral">
         <div class="mx-auto w-full max-w-7xl p-6">
           <RouterView />

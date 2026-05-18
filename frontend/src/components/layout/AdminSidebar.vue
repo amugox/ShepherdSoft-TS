@@ -21,7 +21,7 @@ const isSuperAdmin = computed(() => isSystemSuperAdminUser(auth.user));
     </RouterLink>
 
     <div class="border-b border-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-      Admin
+      System Admin
     </div>
 
     <nav class="flex-1 overflow-y-auto py-2">

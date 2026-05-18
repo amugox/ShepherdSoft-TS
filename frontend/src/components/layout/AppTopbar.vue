@@ -5,23 +5,30 @@ import { UserCircleIcon, ArrowLeftOnRectangleIcon } from '@heroicons/vue/24/outl
 
 import { useAuthStore } from '@/stores/auth';
 
+const props = withDefaults(defineProps<{
+  context?: 'app' | 'admin';
+}>(), {
+  context: 'app',
+});
+
 const auth = useAuthStore();
 const router = useRouter();
 
 const name = computed(() => auth.user?.fnames ?? auth.user?.uname ?? '');
-const branch = computed(() => auth.user?.br_name ?? '');
+const contextLabel = computed(() => (props.context === 'admin' ? 'Access' : 'Branch'));
+const contextValue = computed(() => (props.context === 'admin' ? 'System Administration' : (auth.user?.br_name ?? '')));
 
 const logout = async (): Promise<void> => {
   await auth.logout();
 };
-const goProfile = (): Promise<unknown> => router.push('/profile');
+const goProfile = (): Promise<unknown> => router.push(props.context === 'admin' ? '/admin/profile' : '/profile');
 </script>
 
 <template>
   <header class="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-6">
     <div class="flex items-center gap-3">
       <h1 class="text-sm font-medium text-slate-700">
-        <span class="text-slate-500">Branch:</span> {{ branch || '—' }}
+        <span class="text-slate-500">{{ contextLabel }}:</span> {{ contextValue || '—' }}
       </h1>
     </div>
     <div class="flex items-center gap-3">
