@@ -9,6 +9,7 @@ describe('AuthService', () => {
       verifyUser: jest.fn(),
       verifyUserByCode: jest.fn(),
       userLogin: jest.fn(),
+      userLoginOnConn: jest.fn(),
       changeUserPwd: jest.fn(),
     };
     const tokens = {
@@ -17,6 +18,7 @@ describe('AuthService', () => {
     const prisma = {
       $queryRawUnsafe: jest.fn(),
       $executeRawUnsafe: jest.fn(),
+      $transaction: jest.fn(),
       app_setts: {
         findUnique: jest.fn().mockResolvedValue({ item_val: '0' }),
         upsert: jest.fn(),
@@ -33,9 +35,16 @@ describe('AuthService', () => {
         create: jest.fn(),
       },
     };
+    // $transaction runs the callback with the same mock acting as the tx client.
+    prisma.$transaction.mockImplementation((cb: (tx: unknown) => unknown) => cb(prisma));
     const mail = {
       sendOtpCode: jest.fn().mockResolvedValue(true),
       sendPasswordResetCode: jest.fn().mockResolvedValue(true),
+    };
+    const mysql = {
+      withNamedLock: jest.fn().mockImplementation(
+        (_name: string, fn: (conn: object) => unknown) => fn({}),
+      ),
     };
 
     const service = new AuthService(
@@ -43,6 +52,7 @@ describe('AuthService', () => {
       tokens as never,
       prisma as never,
       mail as never,
+      mysql as never,
     );
 
     return { service, security, tokens, prisma, mail };
@@ -58,7 +68,7 @@ describe('AuthService', () => {
     const { service, security, tokens } = makeService();
     const salt = 'branch-salt';
     security.verifyUser.mockResolvedValue({ resp_status: 0, data1: 10, data2: hashPassword('secret', salt), data3: salt });
-    security.userLogin.mockResolvedValue({ resp_status: 0, data1: 'Branch User', data2: '2', data3: '0', data4: 'Main' });
+    security.userLoginOnConn.mockResolvedValue({ resp_status: 0, data1: 'Branch User', data2: '2', data3: '0', data4: 'Main' });
 
     const result = await service.login({ Username: 'branch.user', Password: 'secret', BranchCode: 8 });
 
@@ -144,5 +154,27 @@ describe('AuthService', () => {
       where: { user_code: 44 },
       data: { attempts: { increment: 1 } },
     });
+  });
+
+  it('rejects login for a locked-out admin even with the correct password', async () => {
+    const { service, prisma } = makeService();
+    prisma.users.findUnique.mockResolvedValue({
+      user_code: 44,
+      user_name: 'sys.admin',
+      full_names: 'System Admin',
+      email: 'sys@example.com',
+      pwd: hashPassword('secret', 'admin-salt'),
+      salt: 'admin-salt',
+      user_stat: 0,
+      user_role: 1,
+      change_pwd: false,
+      attempts: 5,
+    });
+
+    await expect(
+      service.login({ Username: 'sys.admin', Password: 'secret', AdminOnly: true }),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+    // Locked out before the password is even checked — no increment.
+    expect(prisma.users.update).not.toHaveBeenCalled();
   });
 });

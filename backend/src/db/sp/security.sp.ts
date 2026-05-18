@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { PoolConnection } from 'mysql2/promise';
 
 import { MySqlService } from '../mysql.service';
 import { normRow, type SpRow } from './types';
@@ -37,6 +38,21 @@ export class SecuritySp {
     sessId: string,
   ): Promise<SpRow | undefined> {
     const row = await this.mysql.callOne('sp_UserLogin', [userCode, stat, token, sessId]);
+    return normRow<SpRow>(row);
+  }
+
+  /** Same as userLogin() but runs on a caller-supplied connection.
+   *  Use when the caller holds a named lock that must cover the INSERT. */
+  async userLoginOnConn(
+    conn: PoolConnection,
+    userCode: number,
+    stat: number,
+    token: string,
+    sessId: string,
+  ): Promise<SpRow | undefined> {
+    const row = await this.mysql.callOneOnConn(
+      conn, 'sp_UserLogin', [userCode, stat, token, sessId],
+    );
     return normRow<SpRow>(row);
   }
 
