@@ -11,6 +11,7 @@ import BaseInput from '@/components/ui/BaseInput.vue';
 import BaseModal from '@/components/ui/BaseModal.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
 import DataTable from '@/components/ui/DataTable.vue';
+import DropdownMenu, { type DropdownMenuItem } from '@/components/ui/DropdownMenu.vue';
 import { useToast } from '@/composables/useToast';
 import { UserPlusIcon, MagnifyingGlassIcon, PencilSquareIcon, EnvelopeIcon, NoSymbolIcon, CheckIcon } from '@heroicons/vue/24/outline';
 
@@ -210,6 +211,12 @@ const sendReset = async (row: UserAdminRecord): Promise<void> => {
   }
 };
 
+const rowMenuItems = (row: UserAdminRecord): DropdownMenuItem[] => [
+  { label: 'Edit', icon: PencilSquareIcon, action: () => openEdit(row) },
+  { label: 'Send reset', icon: EnvelopeIcon, action: () => sendReset(row) },
+  { label: 'Deactivate', icon: NoSymbolIcon, variant: 'danger', disabled: row.user_stat !== 0, action: () => deactivate(row) },
+];
+
 onMounted(async () => {
   try {
     await loadLookups();
@@ -306,7 +313,7 @@ watch(
         { key: 'br_name', label: 'Branch' },
         { key: 'role_name', label: 'Role', width: '140px' },
         { key: 'user_stat', label: 'Status', width: '100px' },
-        { key: 'actions', label: 'Actions', width: '250px' },
+        { key: 'actions', label: '', width: '120px' },
       ]"
       :loading="loading"
       empty-text="No users found."
@@ -317,29 +324,8 @@ watch(
         </span>
       </template>
       <template #actions="{ row }">
-        <div class="flex gap-2">
-          <BaseButton
-            variant="secondary"
-            :icon="PencilSquareIcon"
-            @click.stop="openEdit(row)"
-          >
-            Edit
-          </BaseButton>
-          <BaseButton
-            variant="secondary"
-            :icon="EnvelopeIcon"
-            @click.stop="sendReset(row)"
-          >
-            Send reset
-          </BaseButton>
-          <BaseButton
-            variant="danger"
-            :icon="NoSymbolIcon"
-            :disabled="row.user_stat !== 0"
-            @click.stop="deactivate(row)"
-          >
-            Deactivate
-          </BaseButton>
+        <div class="flex justify-end">
+          <DropdownMenu :items="rowMenuItems(row)" />
         </div>
       </template>
     </DataTable>
