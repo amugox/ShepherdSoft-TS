@@ -108,6 +108,21 @@ describe('AdminService', () => {
     })).resolves.toEqual({ br_code: 10, br_name: 'Main', stat: 0, users_count: 1 });
   });
 
+  it('coerces allocated branch codes to numbers before Prisma create', async () => {
+    prisma.$queryRawUnsafe.mockResolvedValueOnce([{ next_code: 11n }]);
+
+    await service.handle({
+      act: ADMIN_API_ACTION.ADMIN_BRANCH_CREATE,
+      content: { br_name: 'North' },
+      caller: { br_code: 0, ucode: 1, url: 'Super Admin', user_type: 1 },
+      ver: 1,
+    });
+
+    expect(prisma.branches.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ br_code: 11, br_name: 'North', stat: 0 }),
+    }));
+  });
+
   it('allows branch-user creation for system admins with explicit branch', async () => {
     prisma.$queryRawUnsafe.mockResolvedValueOnce([{ next_code: 101 }]);
 
