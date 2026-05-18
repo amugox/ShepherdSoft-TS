@@ -113,6 +113,12 @@ const routes: RouteRecordRaw[] = [
         meta: { requiresAdmin: true },
         component: () => import('@/views/settings/SecurityView.vue'),
       },
+      {
+        path: 'profile',
+        name: 'admin-profile',
+        meta: { requiresAdmin: true },
+        component: () => import('@/views/profile/ProfileView.vue'),
+      },
     ],
   },
   { path: '/:pathMatch(.*)*', redirect: '/' },
