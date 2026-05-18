@@ -79,119 +79,121 @@ onMounted(async () => {
       </p>
     </header>
 
-    <!-- Account Details -->
-    <div class="rounded-xl border border-slate-200 bg-white p-5">
-      <h2 class="mb-4 text-sm font-semibold text-slate-900">
-        Account Details
-      </h2>
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <!-- Account Details -->
+      <div class="rounded-xl border border-slate-200 bg-white p-5">
+        <h2 class="mb-4 text-sm font-semibold text-slate-900">
+          Account Details
+        </h2>
 
-      <div
-        v-if="loadingProfile"
-        class="text-sm text-slate-500"
-      >
-        Loading…
+        <div
+          v-if="loadingProfile"
+          class="text-sm text-slate-500"
+        >
+          Loading…
+        </div>
+
+        <dl
+          v-else-if="profile"
+          class="grid grid-cols-1 gap-4"
+        >
+          <div>
+            <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Username
+            </dt>
+            <dd class="mt-1 text-sm text-slate-900">
+              {{ profile.user_name }}
+            </dd>
+          </div>
+
+          <div>
+            <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Full Name
+            </dt>
+            <dd class="mt-1 text-sm text-slate-900">
+              {{ profile.full_name || '—' }}
+            </dd>
+          </div>
+
+          <div>
+            <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Email
+            </dt>
+            <dd class="mt-1 text-sm text-slate-900">
+              {{ profile.email || '—' }}
+            </dd>
+          </div>
+
+          <div>
+            <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Role
+            </dt>
+            <dd class="mt-1 text-sm text-slate-900">
+              {{ profile.role || '—' }}
+            </dd>
+          </div>
+
+          <div>
+            <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Branch
+            </dt>
+            <dd class="mt-1 text-sm text-slate-900">
+              {{ profile.branch_name || '—' }}
+            </dd>
+          </div>
+
+          <div>
+            <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Last Login
+            </dt>
+            <dd class="mt-1 text-sm text-slate-900">
+              {{ profile.last_login ? formatDateTime(profile.last_login) : '—' }}
+            </dd>
+          </div>
+        </dl>
       </div>
 
-      <dl
-        v-else-if="profile"
-        class="grid grid-cols-1 gap-4 sm:grid-cols-2"
-      >
-        <div>
-          <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Username
-          </dt>
-          <dd class="mt-1 text-sm text-slate-900">
-            {{ profile.user_name }}
-          </dd>
-        </div>
-
-        <div>
-          <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Full Name
-          </dt>
-          <dd class="mt-1 text-sm text-slate-900">
-            {{ profile.full_name || '—' }}
-          </dd>
-        </div>
-
-        <div>
-          <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Email
-          </dt>
-          <dd class="mt-1 text-sm text-slate-900">
-            {{ profile.email || '—' }}
-          </dd>
-        </div>
-
-        <div>
-          <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Role
-          </dt>
-          <dd class="mt-1 text-sm text-slate-900">
-            {{ profile.role || '—' }}
-          </dd>
-        </div>
-
-        <div>
-          <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Branch
-          </dt>
-          <dd class="mt-1 text-sm text-slate-900">
-            {{ profile.branch_name || '—' }}
-          </dd>
-        </div>
-
-        <div>
-          <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Last Login
-          </dt>
-          <dd class="mt-1 text-sm text-slate-900">
-            {{ profile.last_login ? formatDateTime(profile.last_login) : '—' }}
-          </dd>
-        </div>
-      </dl>
-    </div>
-
-    <!-- Change Password -->
-    <div class="rounded-xl border border-slate-200 bg-white p-5">
-      <h2 class="mb-4 text-sm font-semibold text-slate-900">
-        Change Password
-      </h2>
-      <form
-        class="space-y-4"
-        @submit.prevent="onChangePassword"
-      >
-        <BaseInput
-          v-model="oldPassword"
-          type="password"
-          label="Current password"
-          required
-          autocomplete="current-password"
-        />
-        <BaseInput
-          v-model="newPassword"
-          type="password"
-          label="New password"
-          required
-          autocomplete="new-password"
-        />
-        <BaseInput
-          v-model="confirmPassword"
-          type="password"
-          label="Confirm new password"
-          required
-          autocomplete="new-password"
-        />
-        <div class="flex justify-end">
-          <BaseButton
-            type="submit"
-            :icon="KeyIcon"
-            :loading="savingPassword"
-          >
-            Update password
-          </BaseButton>
-        </div>
-      </form>
+      <!-- Change Password -->
+      <div class="rounded-xl border border-slate-200 bg-white p-5">
+        <h2 class="mb-4 text-sm font-semibold text-slate-900">
+          Change Password
+        </h2>
+        <form
+          class="space-y-4"
+          @submit.prevent="onChangePassword"
+        >
+          <BaseInput
+            v-model="oldPassword"
+            type="password"
+            label="Current password"
+            required
+            autocomplete="current-password"
+          />
+          <BaseInput
+            v-model="newPassword"
+            type="password"
+            label="New password"
+            required
+            autocomplete="new-password"
+          />
+          <BaseInput
+            v-model="confirmPassword"
+            type="password"
+            label="Confirm new password"
+            required
+            autocomplete="new-password"
+          />
+          <div class="flex justify-end">
+            <BaseButton
+              type="submit"
+              :icon="KeyIcon"
+              :loading="savingPassword"
+            >
+              Update password
+            </BaseButton>
+          </div>
+        </form>
+      </div>
     </div>
   </section>
 </template>
