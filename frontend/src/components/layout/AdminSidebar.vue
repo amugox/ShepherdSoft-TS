@@ -3,11 +3,11 @@ import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
 
 import BrandLogo from '@/components/brand/BrandLogo.vue';
-import { isSuperAdminRole } from '@/lib/roles';
+import { isSystemSuperAdminUser } from '@/lib/roles';
 import { useAuthStore } from '@/stores/auth';
 
 const auth = useAuthStore();
-const isSuperAdmin = computed(() => isSuperAdminRole(auth.user?.role));
+const isSuperAdmin = computed(() => isSystemSuperAdminUser(auth.user));
 </script>
 
 <template>

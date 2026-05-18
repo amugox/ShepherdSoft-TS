@@ -6,7 +6,7 @@ import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseInput from '@/components/ui/BaseInput.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
 import { useToast } from '@/composables/useToast';
-import { isAdminRole } from '@/lib/roles';
+import { isSystemAdminUser } from '@/lib/roles';
 import { useAuthStore } from '@/stores/auth';
 import { useReferenceStore } from '@/stores/reference';
 import { ArrowRightOnRectangleIcon, ShieldCheckIcon } from '@heroicons/vue/24/outline';
@@ -31,6 +31,7 @@ const awaitingOtp = computed(() => Boolean(auth.otpChallenge));
 const forgotPasswordRoute = computed(() => (props.adminOnly ? '/admin/auth/forgot-password' : '/auth/forgot-password'));
 
 onMounted(async () => {
+  if (props.adminOnly) return;
   try {
     await reference.loadBranches();
   } catch (err) {
@@ -49,7 +50,7 @@ const navigateAfterLogin = async (): Promise<void> => {
 };
 
 const onSubmit = async (): Promise<void> => {
-  if (!username.value || !password.value || !branchCode.value) {
+  if (!username.value || !password.value || (!props.adminOnly && !branchCode.value)) {
     toast.warning('Please fill in all fields.');
     return;
   }
@@ -58,14 +59,15 @@ const onSubmit = async (): Promise<void> => {
     await auth.login({
       Username: username.value,
       Password: password.value,
-      BranchCode: branchCode.value,
+      BranchCode: props.adminOnly ? undefined : (branchCode.value ?? undefined),
+      AdminOnly: props.adminOnly,
     });
 
     if (auth.otpChallenge) {
       toast.success(`OTP sent to ${auth.otpChallenge.maskedEmail ?? 'your email'}.`);
       return;
     }
-    if (props.adminOnly && !isAdminRole(auth.user?.role)) {
+    if (props.adminOnly && !isSystemAdminUser(auth.user)) {
       toast.error('This account does not have admin access.');
       await auth.logout('/admin/auth/login');
       return;
@@ -115,6 +117,7 @@ const onVerifyOtp = async (): Promise<void> => {
         {{ props.adminOnly ? 'Use admin credentials to access the admin area.' : 'Use your branch credentials.' }}
       </p>
       <BaseSelect
+        v-if="!props.adminOnly"
         v-model="branchCode"
         label="Branch"
         required

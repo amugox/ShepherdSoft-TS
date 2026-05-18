@@ -10,14 +10,14 @@ import BaseModal from '@/components/ui/BaseModal.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
 import DataTable from '@/components/ui/DataTable.vue';
 import { useToast } from '@/composables/useToast';
-import { isSuperAdminRole } from '@/lib/roles';
+import { isSystemSuperAdminUser } from '@/lib/roles';
 import { useAuthStore } from '@/stores/auth';
 import { BuildingOfficeIcon, PlusIcon, PencilSquareIcon, NoSymbolIcon, CheckIcon } from '@heroicons/vue/24/outline';
 
 const auth = useAuthStore();
 const toast = useToast();
 
-const isSuperAdmin = computed(() => isSuperAdminRole(auth.user?.role));
+const isSuperAdmin = computed(() => isSystemSuperAdminUser(auth.user));
 const loading = ref(false);
 const saving = ref(false);
 const branches = ref<BranchAdminRecord[]>([]);

@@ -23,6 +23,7 @@ export class CallerInterceptor implements NestInterceptor {
       caller.fnames = u.FullNames;
       caller.url = u.UserRole;
       caller.sid = u.SessionID;
+      caller.user_type = u.UserType ?? 0;
       caller.ttl = u.Title;
       req.caller = caller;
       if (req.body && typeof req.body === 'object') {

@@ -33,7 +33,7 @@ const onRequestReset = async (): Promise<void> => {
   }
   resetRequesting.value = true;
   try {
-    await auth.requestPasswordReset({ userNameOrEmail: resetIdentifier.value.trim() });
+    await auth.requestPasswordReset({ userNameOrEmail: resetIdentifier.value.trim(), adminOnly: props.adminOnly });
     toast.success('If the account exists, a reset code has been sent.');
     resetStep.value = 'complete';
   } catch (err) {
