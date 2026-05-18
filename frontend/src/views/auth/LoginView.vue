@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseInput from '@/components/ui/BaseInput.vue';
@@ -9,7 +9,7 @@ import { useToast } from '@/composables/useToast';
 import { isAdminRole } from '@/lib/roles';
 import { useAuthStore } from '@/stores/auth';
 import { useReferenceStore } from '@/stores/reference';
-import { ArrowRightOnRectangleIcon, ShieldCheckIcon, EnvelopeIcon, LockOpenIcon } from '@heroicons/vue/24/outline';
+import { ArrowRightOnRectangleIcon, ShieldCheckIcon } from '@heroicons/vue/24/outline';
 
 const props = withDefaults(defineProps<{ adminOnly?: boolean }>(), {
   adminOnly: false,
@@ -27,15 +27,8 @@ const branchCode = ref<number | null>(null);
 const otpCode = ref('');
 const submitting = ref(false);
 
-const resetIdentifier = ref('');
-const resetId = ref('');
-const resetCode = ref('');
-const resetPassword = ref('');
-const resetConfirm = ref('');
-const resetRequesting = ref(false);
-const resetCompleting = ref(false);
-
 const awaitingOtp = computed(() => Boolean(auth.otpChallenge));
+const forgotPasswordRoute = computed(() => (props.adminOnly ? '/admin/auth/forgot-password' : '/auth/forgot-password'));
 
 onMounted(async () => {
   try {
@@ -106,46 +99,6 @@ const onVerifyOtp = async (): Promise<void> => {
   }
 };
 
-const onRequestReset = async (): Promise<void> => {
-  if (!resetIdentifier.value.trim()) {
-    toast.warning('Enter your username or email.');
-    return;
-  }
-  resetRequesting.value = true;
-  try {
-    await auth.requestPasswordReset({ userNameOrEmail: resetIdentifier.value.trim() });
-    toast.success('If the account exists, a reset code has been sent.');
-  } catch (err) {
-    toast.error(err instanceof Error ? err.message : 'Failed to request reset.');
-  } finally {
-    resetRequesting.value = false;
-  }
-};
-
-const onCompleteReset = async (): Promise<void> => {
-  if (!resetId.value || !resetCode.value || !resetPassword.value || !resetConfirm.value) {
-    toast.warning('Fill all reset fields.');
-    return;
-  }
-  resetCompleting.value = true;
-  try {
-    await auth.completePasswordReset({
-      resetId: resetId.value.trim(),
-      code: resetCode.value.trim(),
-      newPassword: resetPassword.value,
-      confirmPassword: resetConfirm.value,
-    });
-    toast.success('Password reset complete. You can now sign in.');
-    resetId.value = '';
-    resetCode.value = '';
-    resetPassword.value = '';
-    resetConfirm.value = '';
-  } catch (err) {
-    toast.error(err instanceof Error ? err.message : 'Failed to complete reset.');
-  } finally {
-    resetCompleting.value = false;
-  }
-};
 </script>
 
 <template>
@@ -189,6 +142,12 @@ const onCompleteReset = async (): Promise<void> => {
       >
         Sign in
       </BaseButton>
+      <RouterLink
+        :to="forgotPasswordRoute"
+        class="block text-right text-sm font-medium text-brand-700 hover:underline"
+      >
+        Forgot password?
+      </RouterLink>
     </form>
 
     <form
@@ -216,52 +175,5 @@ const onCompleteReset = async (): Promise<void> => {
         Verify OTP
       </BaseButton>
     </form>
-
-    <section class="space-y-3 rounded-lg border border-slate-200 bg-white p-4">
-      <h2 class="text-sm font-semibold text-slate-900">
-        Forgot password?
-      </h2>
-      <BaseInput
-        v-model="resetIdentifier"
-        label="Username or email"
-      />
-      <BaseButton
-        variant="secondary"
-        :icon="EnvelopeIcon"
-        :loading="resetRequesting"
-        @click="onRequestReset"
-      >
-        Send reset code
-      </BaseButton>
-
-      <div class="mt-3 space-y-3 border-t border-slate-200 pt-3">
-        <BaseInput
-          v-model="resetId"
-          label="Reset ID"
-        />
-        <BaseInput
-          v-model="resetCode"
-          label="Reset code"
-        />
-        <BaseInput
-          v-model="resetPassword"
-          type="password"
-          label="New password"
-        />
-        <BaseInput
-          v-model="resetConfirm"
-          type="password"
-          label="Confirm password"
-        />
-        <BaseButton
-          variant="secondary"
-          :icon="LockOpenIcon"
-          :loading="resetCompleting"
-          @click="onCompleteReset"
-        >
-          Complete reset
-        </BaseButton>
-      </div>
-    </section>
   </div>
 </template>
