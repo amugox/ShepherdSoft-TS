@@ -22,6 +22,7 @@ const resetPassword = ref('');
 const resetConfirm = ref('');
 const resetRequesting = ref(false);
 const resetCompleting = ref(false);
+const resetStep = ref<'request' | 'complete'>('request');
 
 const loginRoute = computed(() => (props.adminOnly ? '/admin/auth/login' : '/auth/login'));
 
@@ -34,6 +35,7 @@ const onRequestReset = async (): Promise<void> => {
   try {
     await auth.requestPasswordReset({ userNameOrEmail: resetIdentifier.value.trim() });
     toast.success('If the account exists, a reset code has been sent.');
+    resetStep.value = 'complete';
   } catch (err) {
     toast.error(err instanceof Error ? err.message : 'Failed to request reset.');
   } finally {
@@ -59,11 +61,16 @@ const onCompleteReset = async (): Promise<void> => {
     resetCode.value = '';
     resetPassword.value = '';
     resetConfirm.value = '';
+    resetStep.value = 'request';
   } catch (err) {
     toast.error(err instanceof Error ? err.message : 'Failed to complete reset.');
   } finally {
     resetCompleting.value = false;
   }
+};
+
+const goToRequestStep = (): void => {
+  resetStep.value = 'request';
 };
 </script>
 
@@ -78,49 +85,69 @@ const onCompleteReset = async (): Promise<void> => {
       </p>
     </div>
 
-    <section class="space-y-3 rounded-lg border border-slate-200 bg-white p-4">
+    <form
+      v-if="resetStep === 'request'"
+      class="space-y-3 rounded-lg border border-slate-200 bg-white p-4"
+      @submit.prevent="onRequestReset"
+    >
       <BaseInput
         v-model="resetIdentifier"
         label="Username or email"
       />
       <BaseButton
+        type="submit"
         variant="secondary"
         :icon="EnvelopeIcon"
         :loading="resetRequesting"
-        @click="onRequestReset"
       >
         Send reset code
       </BaseButton>
+    </form>
 
-      <div class="mt-3 space-y-3 border-t border-slate-200 pt-3">
-        <BaseInput
-          v-model="resetId"
-          label="Reset ID"
-        />
-        <BaseInput
-          v-model="resetCode"
-          label="Reset code"
-        />
-        <BaseInput
-          v-model="resetPassword"
-          type="password"
-          label="New password"
-        />
-        <BaseInput
-          v-model="resetConfirm"
-          type="password"
-          label="Confirm password"
-        />
+    <form
+      v-else
+      class="space-y-3 rounded-lg border border-slate-200 bg-white p-4"
+      @submit.prevent="onCompleteReset"
+    >
+      <p class="text-sm text-slate-500">
+        Enter the reset ID and code from your email, then choose a new password.
+      </p>
+      <BaseInput
+        v-model="resetId"
+        label="Reset ID"
+      />
+      <BaseInput
+        v-model="resetCode"
+        label="Reset code"
+      />
+      <BaseInput
+        v-model="resetPassword"
+        type="password"
+        label="New password"
+      />
+      <BaseInput
+        v-model="resetConfirm"
+        type="password"
+        label="Confirm password"
+      />
+      <div class="flex flex-wrap items-center gap-2">
         <BaseButton
+          type="submit"
           variant="secondary"
           :icon="LockOpenIcon"
           :loading="resetCompleting"
-          @click="onCompleteReset"
         >
           Complete reset
         </BaseButton>
+        <BaseButton
+          type="button"
+          variant="ghost"
+          @click="goToRequestStep"
+        >
+          Request a new code
+        </BaseButton>
       </div>
-    </section>
+    </form>
 
     <RouterLink
       :to="loginRoute"
