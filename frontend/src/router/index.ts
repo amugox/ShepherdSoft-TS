@@ -15,6 +15,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/auth/LoginView.vue'),
       },
       {
+        path: 'forgot-password',
+        name: 'forgot-password',
+        meta: { requiresAuth: false, publicOnly: true },
+        component: () => import('@/views/auth/ForgotPasswordView.vue'),
+      },
+      {
         path: 'changepass',
         name: 'change-pass',
         // Inherits requiresAuth from parent, but ChangePass needs auth — override.
@@ -33,6 +39,13 @@ const routes: RouteRecordRaw[] = [
         name: 'admin-login',
         meta: { requiresAuth: false, publicOnly: true, adminLogin: true },
         component: () => import('@/views/auth/LoginView.vue'),
+        props: { adminOnly: true },
+      },
+      {
+        path: 'forgot-password',
+        name: 'admin-forgot-password',
+        meta: { requiresAuth: false, publicOnly: true, adminLogin: true },
+        component: () => import('@/views/auth/ForgotPasswordView.vue'),
         props: { adminOnly: true },
       },
     ],
