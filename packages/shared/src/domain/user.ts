@@ -11,7 +11,8 @@
 export interface UserLoginPayload {
   Username: string;
   Password: string;
-  BranchCode: number;
+  BranchCode?: number;
+  AdminOnly?: boolean;
   RememberMe?: boolean;
   OtpCode?: string;
   OtpChallengeId?: string;
@@ -41,6 +42,7 @@ export interface UserData {
   tkn?: string;
   ltm?: string;
   role?: string;
+  user_type?: number;
   cpass?: boolean;
   s2fa?: boolean;
 }
@@ -135,8 +137,54 @@ export interface UserAdminDeactivatePayload {
   user_code: number;
 }
 
+export interface AdminUserRecord {
+  user_code: number;
+  user_name: string;
+  full_names: string;
+  phone_no: string;
+  email: string;
+  user_stat: number;
+  user_role: number;
+  role_name?: string | null;
+  change_pwd?: boolean | null;
+  last_login?: string | null;
+  reg_date?: string | null;
+}
+
+export interface AdminUserListPayload {
+  searchText?: string;
+  includeInactive?: boolean;
+}
+
+export interface AdminUserGetPayload {
+  userCode: number;
+}
+
+export interface AdminUserCreatePayload {
+  user_name: string;
+  full_names: string;
+  phone_no: string;
+  email: string;
+  user_role: number;
+  sendReset: boolean;
+}
+
+export interface AdminUserUpdatePayload {
+  user_code: number;
+  full_names?: string;
+  phone_no?: string;
+  email?: string;
+  user_role?: number;
+  user_stat?: number;
+}
+
+export interface AdminUserDeactivatePayload {
+  user_code: number;
+}
+
 export interface PasswordResetRequestPayload {
   userNameOrEmail: string;
+  adminOnly?: boolean;
 }
 
 export interface PasswordResetCompletePayload {
@@ -165,6 +213,7 @@ export interface UserProfileData {
 export interface ApiAppContext {
   UserCode: number;
   BranchCode: number;
+  UserType?: number;
   Token?: string;
   SessionID?: string;
   Username?: string;

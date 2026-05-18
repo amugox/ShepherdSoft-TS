@@ -6,7 +6,7 @@ const hydrateFromStorage = vi.fn();
 const mockAuth = {
   hydrateFromStorage,
   isAuthenticated: true,
-  user: { role: 'Admin' },
+  user: { role: 'Admin', user_type: 1 },
 };
 
 vi.mock('@/stores/auth', () => ({
@@ -17,7 +17,7 @@ describe('globalAuthGuard', () => {
   beforeEach(() => {
     hydrateFromStorage.mockClear();
     mockAuth.isAuthenticated = true;
-    mockAuth.user = { role: 'Admin' };
+    mockAuth.user = { role: 'Admin', user_type: 1 };
   });
 
   it('redirects unauthenticated users to login', () => {
@@ -38,7 +38,7 @@ describe('globalAuthGuard', () => {
   });
 
   it('redirects authenticated non-admin away from admin login to app home', () => {
-    mockAuth.user = { role: 'Viewer' };
+    mockAuth.user = { role: 'Viewer', user_type: 0 };
     const result = globalAuthGuard.call(undefined, {
       fullPath: '/admin/auth/login',
       meta: { requiresAuth: false, publicOnly: true, adminLogin: true },
@@ -47,7 +47,7 @@ describe('globalAuthGuard', () => {
   });
 
   it('blocks non-admin users from admin routes', () => {
-    mockAuth.user = { role: 'Viewer' };
+    mockAuth.user = { role: 'Viewer', user_type: 0 };
     const result = globalAuthGuard.call(undefined, {
       fullPath: '/admin/users',
       meta: { requiresAuth: true, requiresAdmin: true },
@@ -56,7 +56,7 @@ describe('globalAuthGuard', () => {
   });
 
   it('blocks admin users from super-admin-only routes', () => {
-    mockAuth.user = { role: 'Admin' };
+    mockAuth.user = { role: 'Admin', user_type: 1 };
     const result = globalAuthGuard.call(undefined, {
       fullPath: '/admin/branches',
       meta: { requiresAuth: true, requiresSuperAdmin: true },
@@ -65,11 +65,20 @@ describe('globalAuthGuard', () => {
   });
 
   it('allows super-admin-only routes for super admin', () => {
-    mockAuth.user = { role: 'Super Admin' };
+    mockAuth.user = { role: 'Super Admin', user_type: 1 };
     const result = globalAuthGuard.call(undefined, {
       fullPath: '/admin/branches',
       meta: { requiresAuth: true, requiresSuperAdmin: true },
     } as never, {} as never, {} as never);
     expect(result).toBe(true);
+  });
+
+  it('blocks branch admins from admin routes', () => {
+    mockAuth.user = { role: 'Admin', user_type: 0 };
+    const result = globalAuthGuard.call(undefined, {
+      fullPath: '/admin/users',
+      meta: { requiresAuth: true, requiresAdmin: true },
+    } as never, {} as never, {} as never);
+    expect(result).toEqual({ path: '/' });
   });
 });

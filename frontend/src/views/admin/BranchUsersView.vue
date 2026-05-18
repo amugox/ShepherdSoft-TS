@@ -10,15 +10,9 @@ import BaseModal from '@/components/ui/BaseModal.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
 import DataTable from '@/components/ui/DataTable.vue';
 import { useToast } from '@/composables/useToast';
-import { isSuperAdminRole } from '@/lib/roles';
-import { useAuthStore } from '@/stores/auth';
 import { UserPlusIcon, MagnifyingGlassIcon, PencilSquareIcon, EnvelopeIcon, NoSymbolIcon, CheckIcon } from '@heroicons/vue/24/outline';
 
-const auth = useAuthStore();
 const toast = useToast();
-
-const isSuperAdmin = computed(() => isSuperAdminRole(auth.user?.role));
-const currentBranchCode = computed(() => Number(auth.user?.br_code ?? 0));
 
 const loading = ref(false);
 const saving = ref(false);
@@ -85,7 +79,7 @@ const load = async (): Promise<void> => {
 
 const resetCreateForm = (): void => {
   createForm.value = {
-    br_code: isSuperAdmin.value ? null : currentBranchCode.value,
+    br_code: null,
     user_name: '',
     member_code: '',
     email: '',
@@ -112,7 +106,7 @@ const submitCreate = async (): Promise<void> => {
     || !createForm.value.member_code
     || !createForm.value.email
     || createForm.value.user_role === null
-    || (isSuperAdmin.value && !createForm.value.br_code)
+    || !createForm.value.br_code
   ) {
     toast.warning('Fill all required fields.');
     return;
@@ -120,7 +114,7 @@ const submitCreate = async (): Promise<void> => {
   saving.value = true;
   try {
     await adminApi.createBranchUser({
-      br_code: (isSuperAdmin.value ? createForm.value.br_code : currentBranchCode.value) ?? undefined,
+      br_code: createForm.value.br_code ?? undefined,
       user_name: createForm.value.user_name.trim(),
       member_code: Number(createForm.value.member_code),
       email: createForm.value.email.trim(),
@@ -143,7 +137,7 @@ const submitEdit = async (): Promise<void> => {
     !editForm.value.user_code
     || !editForm.value.member_code
     || editForm.value.user_role === null
-    || (isSuperAdmin.value && !editForm.value.br_code)
+    || !editForm.value.br_code
   ) {
     toast.warning('Fill all required fields.');
     return;
@@ -152,7 +146,7 @@ const submitEdit = async (): Promise<void> => {
   try {
     await adminApi.updateBranchUser({
       user_code: editForm.value.user_code,
-      br_code: isSuperAdmin.value ? (editForm.value.br_code ?? undefined) : undefined,
+      br_code: editForm.value.br_code ?? undefined,
       member_code: Number(editForm.value.member_code),
       email: editForm.value.email.trim(),
       user_role: Number(editForm.value.user_role),
@@ -190,9 +184,6 @@ const sendReset = async (row: UserAdminRecord): Promise<void> => {
 onMounted(async () => {
   try {
     await loadLookups();
-    if (!isSuperAdmin.value) {
-      filters.value.branchCode = currentBranchCode.value;
-    }
     resetCreateForm();
     await load();
   } catch (err) {
@@ -233,7 +224,6 @@ onMounted(async () => {
       <BaseSelect
         v-model="filters.branchCode"
         label="Branch"
-        :disabled="!isSuperAdmin"
         :options="[{ value: 0, label: 'All branches' }, ...branchOptions]"
       />
       <BaseSelect
@@ -318,7 +308,6 @@ onMounted(async () => {
         <BaseSelect
           v-model="createForm.br_code"
           label="Branch"
-          :disabled="!isSuperAdmin"
           required
           :options="branchOptions"
         />
@@ -373,7 +362,6 @@ onMounted(async () => {
         <BaseSelect
           v-model="editForm.br_code"
           label="Branch"
-          :disabled="!isSuperAdmin"
           required
           :options="branchOptions"
         />

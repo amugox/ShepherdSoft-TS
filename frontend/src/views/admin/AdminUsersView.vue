@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 
-import type { BranchAdminRecord, UserAdminRecord } from '@shepherd/shared';
+import type { AdminUserRecord } from '@shepherd/shared';
 
 import { adminApi } from '@/api/admin';
 import BaseButton from '@/components/ui/BaseButton.vue';
@@ -10,26 +10,26 @@ import BaseModal from '@/components/ui/BaseModal.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
 import DataTable from '@/components/ui/DataTable.vue';
 import { useToast } from '@/composables/useToast';
-import { isSuperAdminRole } from '@/lib/roles';
+import { isSystemSuperAdminUser } from '@/lib/roles';
 import { useAuthStore } from '@/stores/auth';
 import { UserPlusIcon, MagnifyingGlassIcon, PencilSquareIcon, EnvelopeIcon, NoSymbolIcon, CheckIcon } from '@heroicons/vue/24/outline';
 
 const auth = useAuthStore();
 const toast = useToast();
 
-const adminRoleCode = 1;
-const isSuperAdmin = computed(() => isSuperAdminRole(auth.user?.role));
-const currentBranchCode = computed(() => Number(auth.user?.br_code ?? 0));
+const isSuperAdmin = computed(() => isSystemSuperAdminUser(auth.user));
 
 const loading = ref(false);
 const saving = ref(false);
 
-const admins = ref<UserAdminRecord[]>([]);
-const branches = ref<BranchAdminRecord[]>([]);
+const admins = ref<AdminUserRecord[]>([]);
+const roleOptions = [
+  { value: 1, label: 'Admin' },
+  { value: 0, label: 'Super Admin' },
+];
 
 const filters = ref({
   searchText: '',
-  branchCode: 0,
   includeInactive: true,
 });
 
@@ -37,34 +37,28 @@ const createOpen = ref(false);
 const editOpen = ref(false);
 
 const createForm = ref({
-  br_code: null as number | null,
   user_name: '',
-  member_code: '',
+  full_names: '',
+  phone_no: '',
   email: '',
+  user_role: 1,
   sendReset: true,
 });
 
 const editForm = ref({
   user_code: 0,
-  br_code: null as number | null,
-  member_code: '',
+  full_names: '',
+  phone_no: '',
   email: '',
+  user_role: 1,
   user_stat: 0,
 });
-
-const branchOptions = computed(() => branches.value.map((b) => ({ value: b.br_code, label: b.br_name })));
-
-const loadLookups = async (): Promise<void> => {
-  branches.value = (await adminApi.listBranches({ includeInactive: true })) ?? [];
-};
 
 const load = async (): Promise<void> => {
   loading.value = true;
   try {
-    admins.value = (await adminApi.listBranchUsers({
+    admins.value = (await adminApi.listAdmins({
       searchText: filters.value.searchText.trim(),
-      branchCode: filters.value.branchCode > 0 ? filters.value.branchCode : undefined,
-      roleCode: adminRoleCode,
       includeInactive: filters.value.includeInactive,
     })) ?? [];
   } catch (err) {
@@ -76,98 +70,91 @@ const load = async (): Promise<void> => {
 
 const resetCreateForm = (): void => {
   createForm.value = {
-    br_code: isSuperAdmin.value ? null : currentBranchCode.value,
     user_name: '',
-    member_code: '',
+    full_names: '',
+    phone_no: '',
     email: '',
+    user_role: 1,
     sendReset: true,
   };
 };
 
-const openEdit = (row: UserAdminRecord): void => {
+const openEdit = (row: AdminUserRecord): void => {
   editForm.value = {
     user_code: row.user_code,
-    br_code: row.br_code,
-    member_code: String(row.member_code ?? ''),
-    email: row.email ?? '',
+    full_names: row.full_names,
+    phone_no: row.phone_no,
+    email: row.email,
+    user_role: row.user_role,
     user_stat: row.user_stat,
   };
   editOpen.value = true;
 };
 
 const submitCreate = async (): Promise<void> => {
-  if (
-    !createForm.value.user_name
-    || !createForm.value.member_code
-    || !createForm.value.email
-    || (isSuperAdmin.value && !createForm.value.br_code)
-  ) {
+  if (!createForm.value.user_name || !createForm.value.full_names || !createForm.value.phone_no || !createForm.value.email) {
     toast.warning('Fill all required fields.');
     return;
   }
   saving.value = true;
   try {
-    await adminApi.createBranchUser({
-      br_code: (isSuperAdmin.value ? createForm.value.br_code : currentBranchCode.value) ?? undefined,
+    await adminApi.createAdmin({
       user_name: createForm.value.user_name.trim(),
-      member_code: Number(createForm.value.member_code),
+      full_names: createForm.value.full_names.trim(),
+      phone_no: createForm.value.phone_no.trim(),
       email: createForm.value.email.trim(),
-      user_role: adminRoleCode,
+      user_role: Number(createForm.value.user_role),
       sendReset: createForm.value.sendReset,
     });
     createOpen.value = false;
     resetCreateForm();
-    toast.success('Admin user created.');
+    toast.success('Admin created.');
     await load();
   } catch (err) {
-    toast.error(err instanceof Error ? err.message : 'Failed to create admin user.');
+    toast.error(err instanceof Error ? err.message : 'Failed to create admin.');
   } finally {
     saving.value = false;
   }
 };
 
 const submitEdit = async (): Promise<void> => {
-  if (
-    !editForm.value.user_code
-    || !editForm.value.member_code
-    || (isSuperAdmin.value && !editForm.value.br_code)
-  ) {
+  if (!editForm.value.user_code || !editForm.value.full_names || !editForm.value.phone_no || !editForm.value.email) {
     toast.warning('Fill all required fields.');
     return;
   }
   saving.value = true;
   try {
-    await adminApi.updateBranchUser({
+    await adminApi.updateAdmin({
       user_code: editForm.value.user_code,
-      br_code: isSuperAdmin.value ? (editForm.value.br_code ?? undefined) : undefined,
-      member_code: Number(editForm.value.member_code),
+      full_names: editForm.value.full_names.trim(),
+      phone_no: editForm.value.phone_no.trim(),
       email: editForm.value.email.trim(),
-      user_role: adminRoleCode,
+      user_role: Number(editForm.value.user_role),
       user_stat: Number(editForm.value.user_stat),
     });
     editOpen.value = false;
-    toast.success('Admin user updated.');
+    toast.success('Admin updated.');
     await load();
   } catch (err) {
-    toast.error(err instanceof Error ? err.message : 'Failed to update admin user.');
+    toast.error(err instanceof Error ? err.message : 'Failed to update admin.');
   } finally {
     saving.value = false;
   }
 };
 
-const deactivate = async (row: UserAdminRecord): Promise<void> => {
+const deactivate = async (row: AdminUserRecord): Promise<void> => {
   try {
-    await adminApi.deactivateBranchUser({ user_code: row.user_code });
-    toast.success('Admin user deactivated.');
+    await adminApi.deactivateAdmin(row.user_code);
+    toast.success('Admin deactivated.');
     await load();
   } catch (err) {
-    toast.error(err instanceof Error ? err.message : 'Failed to deactivate admin user.');
+    toast.error(err instanceof Error ? err.message : 'Failed to deactivate admin.');
   }
 };
 
-const sendReset = async (row: UserAdminRecord): Promise<void> => {
+const sendReset = async (row: AdminUserRecord): Promise<void> => {
   try {
-    await adminApi.triggerBranchUserReset(row.user_code);
+    await adminApi.triggerAdminReset(row.user_code);
     toast.success('Reset code sent.');
   } catch (err) {
     toast.error(err instanceof Error ? err.message : 'Failed to send reset code.');
@@ -176,10 +163,6 @@ const sendReset = async (row: UserAdminRecord): Promise<void> => {
 
 onMounted(async () => {
   try {
-    await loadLookups();
-    if (!isSuperAdmin.value) {
-      filters.value.branchCode = currentBranchCode.value;
-    }
     resetCreateForm();
     await load();
   } catch (err) {
@@ -196,7 +179,7 @@ onMounted(async () => {
           Admin Management
         </h1>
         <p class="text-sm text-slate-500">
-          Create, edit, reset passwords, and manage admin accounts by branch.
+          Manage system administrators, roles, status, and password reset flow.
         </p>
       </div>
       <BaseButton
@@ -208,20 +191,14 @@ onMounted(async () => {
     </header>
 
     <form
-      class="grid grid-cols-1 gap-2 md:grid-cols-4"
+      class="grid grid-cols-1 gap-2 md:grid-cols-3"
       @submit.prevent="load"
     >
       <BaseInput
         v-model="filters.searchText"
         label="Search"
-        placeholder="Username, name or email"
+        placeholder="Username, name, phone or email"
         class="md:col-span-2"
-      />
-      <BaseSelect
-        v-model="filters.branchCode"
-        label="Branch"
-        :disabled="!isSuperAdmin"
-        :options="[{ value: 0, label: 'All branches' }, ...branchOptions]"
       />
       <div class="flex items-end">
         <BaseButton
@@ -248,9 +225,10 @@ onMounted(async () => {
       :rows="admins"
       :columns="[
         { key: 'user_name', label: 'Username' },
-        { key: 'full_name', label: 'Name' },
+        { key: 'full_names', label: 'Name' },
+        { key: 'phone_no', label: 'Phone' },
         { key: 'email', label: 'Email' },
-        { key: 'br_name', label: 'Branch' },
+        { key: 'role_name', label: 'Role', width: '140px' },
         { key: 'user_stat', label: 'Status', width: '100px' },
         { key: 'actions', label: 'Actions', width: '250px' },
       ]"
@@ -292,25 +270,23 @@ onMounted(async () => {
 
     <BaseModal
       :open="createOpen"
-      title="Create admin user"
+      title="Create admin"
       @close="createOpen = false"
     >
       <div class="space-y-3">
-        <BaseSelect
-          v-model="createForm.br_code"
-          label="Branch"
-          :disabled="!isSuperAdmin"
-          required
-          :options="branchOptions"
-        />
         <BaseInput
           v-model="createForm.user_name"
           label="Username"
           required
         />
         <BaseInput
-          v-model="createForm.member_code"
-          label="Member code"
+          v-model="createForm.full_names"
+          label="Full names"
+          required
+        />
+        <BaseInput
+          v-model="createForm.phone_no"
+          label="Phone number"
           required
         />
         <BaseInput
@@ -318,6 +294,12 @@ onMounted(async () => {
           type="email"
           label="Email"
           required
+        />
+        <BaseSelect
+          v-model="createForm.user_role"
+          label="Role"
+          :disabled="!isSuperAdmin"
+          :options="isSuperAdmin ? roleOptions : roleOptions.filter((option) => option.value === 1)"
         />
         <label class="inline-flex items-center gap-2 text-sm text-slate-700">
           <input
@@ -341,26 +323,31 @@ onMounted(async () => {
 
     <BaseModal
       :open="editOpen"
-      title="Edit admin user"
+      title="Edit admin"
       @close="editOpen = false"
     >
       <div class="space-y-3">
-        <BaseSelect
-          v-model="editForm.br_code"
-          label="Branch"
-          :disabled="!isSuperAdmin"
+        <BaseInput
+          v-model="editForm.full_names"
+          label="Full names"
           required
-          :options="branchOptions"
         />
         <BaseInput
-          v-model="editForm.member_code"
-          label="Member code"
+          v-model="editForm.phone_no"
+          label="Phone number"
           required
         />
         <BaseInput
           v-model="editForm.email"
           type="email"
           label="Email"
+          required
+        />
+        <BaseSelect
+          v-model="editForm.user_role"
+          label="Role"
+          :disabled="!isSuperAdmin"
+          :options="isSuperAdmin ? roleOptions : roleOptions.filter((option) => option.value === 1)"
         />
         <BaseSelect
           v-model="editForm.user_stat"
@@ -376,7 +363,7 @@ onMounted(async () => {
             :loading="saving"
             @click="submitEdit"
           >
-            Update
+            Save changes
           </BaseButton>
         </div>
       </div>

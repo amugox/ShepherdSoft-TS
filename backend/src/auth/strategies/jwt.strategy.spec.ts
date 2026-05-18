@@ -33,7 +33,7 @@ describe('JwtStrategy', () => {
     const out = await strategy.validate({} as never, {
       sub: 'abc',
       jti: 'jti-1',
-      userData: JSON.stringify({ UserCode: 10, BranchCode: 10, SessionID: 'sess-1' }),
+      userData: JSON.stringify({ UserCode: 10, BranchCode: 10, UserType: 0, SessionID: 'sess-1' }),
     });
     expect(out.sub).toBe('abc');
     expect(out.jti).toBe('jti-1');
@@ -45,7 +45,7 @@ describe('JwtStrategy', () => {
     await expect(strategy.validate({} as never, {
       sub: 'abc',
       jti: 'jti-1',
-      userData: JSON.stringify({ UserCode: 10, BranchCode: 10, SessionID: 'sess-1' }),
+      userData: JSON.stringify({ UserCode: 10, BranchCode: 10, UserType: 0, SessionID: 'sess-1' }),
     })).rejects.toBeInstanceOf(UnauthorizedException);
   });
 });

@@ -37,6 +37,11 @@ export class RequestHeaderDto {
   @IsString()
   sid?: string;
 
+  @Expose({ name: 'user_type' })
+  @IsInt()
+  @IsOptional()
+  user_type = 0;
+
   @Expose({ name: 'url' })
   @IsOptional()
   @IsString()

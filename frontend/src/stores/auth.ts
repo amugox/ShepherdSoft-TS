@@ -86,6 +86,7 @@ export const useAuthStore = defineStore('auth', () => {
         Username: payload.Username,
         Password: payload.Password,
         BranchCode: payload.BranchCode,
+        AdminOnly: payload.AdminOnly,
         RememberMe: payload.RememberMe,
       };
       return;
