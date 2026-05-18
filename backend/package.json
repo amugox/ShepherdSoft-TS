@@ -4,6 +4,8 @@
   "private": true,
   "description": "ShepherdSoft branch-user API (NestJS).",
   "scripts": {
+    "prestart:dev": "pnpm -F @shepherd/shared build",
+    "prestart:debug": "pnpm -F @shepherd/shared build",
     "build": "nest build",
     "start": "node dist/main.js",
     "start:dev": "nest start --watch",
