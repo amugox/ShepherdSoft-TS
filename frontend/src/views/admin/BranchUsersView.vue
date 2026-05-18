@@ -55,6 +55,7 @@ const editForm = ref({
 
 const roleOptions = computed(() => roles.value.map((r) => ({ value: r.code, label: r.name })));
 const branchOptions = computed(() => branches.value.map((b) => ({ value: b.br_code, label: b.br_name })));
+const scopedBranchCode = computed(() => (filters.value.branchCode > 0 ? filters.value.branchCode : null));
 const selectedBranch = computed(() =>
   branches.value.find((branch) => branch.br_code === filters.value.branchCode),
 );
@@ -109,13 +110,18 @@ const load = async (): Promise<void> => {
 
 const resetCreateForm = (): void => {
   createForm.value = {
-    br_code: null,
+    br_code: scopedBranchCode.value,
     user_name: '',
     member_code: '',
     email: '',
     user_role: null,
     sendReset: true,
   };
+};
+
+const openCreate = (): void => {
+  resetCreateForm();
+  createOpen.value = true;
 };
 
 const openEdit = (row: UserAdminRecord): void => {
@@ -131,12 +137,13 @@ const openEdit = (row: UserAdminRecord): void => {
 };
 
 const submitCreate = async (): Promise<void> => {
+  const branchCode = scopedBranchCode.value ?? createForm.value.br_code;
   if (
     !createForm.value.user_name
     || !createForm.value.member_code
     || !createForm.value.email
     || createForm.value.user_role === null
-    || !createForm.value.br_code
+    || !branchCode
   ) {
     toast.warning('Fill all required fields.');
     return;
@@ -144,7 +151,7 @@ const submitCreate = async (): Promise<void> => {
   saving.value = true;
   try {
     await adminApi.createBranchUser({
-      br_code: createForm.value.br_code ?? undefined,
+      br_code: branchCode,
       user_name: createForm.value.user_name.trim(),
       member_code: Number(createForm.value.member_code),
       email: createForm.value.email.trim(),
@@ -257,7 +264,7 @@ watch(
       </div>
       <BaseButton
         :icon="UserPlusIcon"
-        @click="createOpen = true"
+        @click="openCreate"
       >
         Add branch user
       </BaseButton>
@@ -337,10 +344,17 @@ watch(
     >
       <div class="space-y-3">
         <BaseSelect
+          v-if="!scopedBranchCode"
           v-model="createForm.br_code"
           label="Branch"
           required
           :options="branchOptions"
+        />
+        <BaseInput
+          v-else
+          :model-value="selectedBranch?.br_name ?? ''"
+          label="Branch"
+          disabled
         />
         <BaseInput
           v-model="createForm.user_name"
