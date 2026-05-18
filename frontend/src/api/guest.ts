@@ -9,13 +9,20 @@ import {
   type GuestPagedResult,
   type GuestPromotePayload,
   type GuestStats,
+  type PageResult,
+  type SearchPayload,
 } from '@shepherd/shared';
 
 import { call } from './envelope';
 
 export const guestApi = {
+<<<<<<< HEAD
   find: (filter: GuestFilter): Promise<GuestPagedResult | undefined> =>
     call<GuestPagedResult>('guest', HTTP_API_ACTION.GUEST_FIND, filter),
+=======
+  find: (filter: GuestFilter): Promise<PageResult<Guest> | undefined> =>
+    call<PageResult<Guest>>('guest', HTTP_API_ACTION.GUEST_FIND, filter),
+>>>>>>> a7445f1 (feat: add server-side pagination to DataTable list views)
 
   get: (code: number): Promise<Guest | undefined> =>
     call<Guest>('guest', HTTP_API_ACTION.GUEST_GET, { code }),
@@ -37,8 +44,8 @@ export const guestApi = {
   addFollowUp: (payload: GuestFollowUpPayload): Promise<unknown> =>
     call('guest', HTTP_API_ACTION.GUEST_FOLLOWUP_ADD, payload),
 
-  findFollowUps: (guestCode = 0): Promise<GuestFollowUp[] | undefined> =>
-    call<GuestFollowUp[]>('guest', HTTP_API_ACTION.GUEST_FOLLOWUP_FIND, { code: guestCode }),
+  findFollowUps: (payload: SearchPayload = { code: 0 }): Promise<PageResult<GuestFollowUp> | undefined> =>
+    call<PageResult<GuestFollowUp>>('guest', HTTP_API_ACTION.GUEST_FOLLOWUP_FIND, payload),
 
   completeFollowUp: (payload: GuestFollowUpCompletePayload): Promise<unknown> =>
     call('guest', HTTP_API_ACTION.GUEST_FOLLOWUP_COMPLETE, payload),

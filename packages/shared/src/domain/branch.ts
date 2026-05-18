@@ -5,6 +5,8 @@
  * these exact keys.
  */
 
+import type { PageParams } from './page';
+
 /** ShepherdSoft.DBL.Entities.Branch */
 export interface Branch {
   /** Br_Code */     code: number;
@@ -45,8 +47,11 @@ export interface ListGroupItem {
  *  - typ:  list type / sub-type discriminator
  *  - code: target item code (or 0 for global)
  *  - stxt: free-text search
+ *
+ * Also carries optional `page` / `pageSize` (from `PageParams`) for list
+ * endpoints that paginate.
  */
-export interface SearchPayload {
+export interface SearchPayload extends PageParams {
   typ?: number;
   code?: number;
   stxt?: string;

@@ -109,10 +109,17 @@ export class GuestService {
 
   private async findFollowUps(p?: SearchPayload, caller?: RequestHeaderDto | null): Promise<unknown> {
     if (p?.code && p.code > 0) {
-      return this.followups.findByGuest(p.code);
+      // Bounded sub-list (one guest's history). Wrap in PageResult so the
+      // wire shape is uniform across paginated and non-paginated callers.
+      const rows = await this.followups.findByGuest(p.code);
+      return { rows, total: rows.length, page: 1, pageSize: Math.max(rows.length, 1) };
     }
+<<<<<<< HEAD
     const branchCode = this.readBranchScopeOrUndefined(caller);
     return this.followups.findPending(branchCode);
+=======
+    return this.followups.findPending(p);
+>>>>>>> a7445f1 (feat: add server-side pagination to DataTable list views)
   }
 
   private async completeFollowUp(p?: GuestFollowUpCompletePayload): Promise<unknown> {

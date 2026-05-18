@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 
+<<<<<<< HEAD
 import type { Guest, GuestFilter, GuestPagedResult, GuestPromotePayload, GuestStats } from '@shepherd/shared';
+=======
+import type { Guest, GuestFilter, GuestPromotePayload, GuestStats, PageResult } from '@shepherd/shared';
+
+import { clampPage, pageResult } from '../page';
+>>>>>>> a7445f1 (feat: add server-side pagination to DataTable list views)
 
 import { MySqlService } from '../mysql.service';
 import { PrismaService } from '../prisma.service';
@@ -148,6 +154,7 @@ export class GuestSp {
     return (normRows<Guest>(rows)[0] as Guest) ?? null;
   }
 
+<<<<<<< HEAD
   async findGuests(f: GuestFilter, branchCode?: number): Promise<GuestPagedResult> {
     const stxt    = f.stxt ?? '';
     const like    = `%${stxt}%`;
@@ -205,12 +212,24 @@ export class GuestSp {
     const dataRows = await this.prisma.$queryRawUnsafe(
       `
       SELECT g.*
+=======
+  async findGuests(f: GuestFilter): Promise<PageResult<Guest>> {
+    const stxt = f.stxt ?? '';
+    const like = `%${stxt}%`;
+    const vtype = f.vtype ?? null;
+    const sstage = f.sstage ?? null;
+    const fuStat = f.fu_stat ?? null;
+    const clamped = clampPage(f);
+
+    const FROM_WHERE = `
+>>>>>>> a7445f1 (feat: add server-side pagination to DataTable list views)
       FROM (${GUEST_SELECT}) g
       LEFT JOIN (
         SELECT guest_code, MAX(followup_status) AS latest_status
         FROM guest_follow_ups
         GROUP BY guest_code
       ) fu ON fu.guest_code = g.code
+<<<<<<< HEAD
       ${whereClause}
       ORDER BY g.vdt DESC, g.code DESC
       LIMIT ? OFFSET ?
@@ -226,6 +245,30 @@ export class GuestSp {
       page,
       page_size: pageSize,
     };
+=======
+      WHERE (? = '' OR CONCAT_WS(' ', g.fname, g.onames, g.pno, g.email) LIKE ?)
+        AND (? IS NULL OR g.vtype = ?)
+        AND (? IS NULL OR g.sstage = ?)
+        AND (? IS NULL OR fu.latest_status = ?)
+    `;
+    const filterParams = [stxt, like, vtype, vtype, sstage, sstage, fuStat, fuStat];
+
+    const [rows, countRows] = await Promise.all([
+      this.prisma.$queryRawUnsafe(
+        `SELECT g.* ${FROM_WHERE} ORDER BY g.vdt DESC, g.code DESC LIMIT ? OFFSET ?`,
+        ...filterParams,
+        clamped.pageSize,
+        clamped.offset,
+      ) as Promise<unknown[]>,
+      this.prisma.$queryRawUnsafe(
+        `SELECT COUNT(*) AS total ${FROM_WHERE}`,
+        ...filterParams,
+      ) as Promise<unknown[]>,
+    ]);
+
+    const total = Number((countRows[0] as { total?: bigint | number })?.total ?? 0);
+    return pageResult(normRows<Guest>(rows) as Guest[], total, clamped);
+>>>>>>> a7445f1 (feat: add server-side pagination to DataTable list views)
   }
 
   async getStats(branchCode?: number): Promise<GuestStats> {

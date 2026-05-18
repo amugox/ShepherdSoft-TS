@@ -28,6 +28,16 @@ const load = async (): Promise<void> => {
 };
 onMounted(load);
 
+const onPage = (p: number): void => {
+  guestStore.followUpsPage = p;
+  void load();
+};
+const onPageSize = (size: number): void => {
+  guestStore.followUpsPageSize = size;
+  guestStore.followUpsPage = 1;
+  void load();
+};
+
 const onComplete = async (payload: GuestFollowUpCompletePayload): Promise<void> => {
   submitting.value = true;
   try {
@@ -91,7 +101,13 @@ const columns = [
     <DataTable
       :rows="guestStore.followUps"
       :columns="columns"
+      :loading="guestStore.loading"
+      :total="guestStore.followUpsTotal"
+      :page="guestStore.followUpsPage"
+      :page-size="guestStore.followUpsPageSize"
       empty-text="No pending follow-ups."
+      @update:page="onPage"
+      @update:page-size="onPageSize"
     >
       <template #fdt="{ value }">
         {{ formatDateOnly(value as string) }}

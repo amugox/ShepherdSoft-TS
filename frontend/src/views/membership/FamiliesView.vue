@@ -20,11 +20,22 @@ const search     = ref('');
 const addOpen    = ref(false);
 const submitting = ref(false);
 
-const refresh = async (): Promise<void> => {
-  try { await store.findFamilies(search.value); }
+const load = async (applySearch: boolean): Promise<void> => {
+  try { await store.findFamilies(applySearch ? search.value : undefined); }
   catch (err) { toast.error(err instanceof Error ? err.message : 'Failed.'); }
 };
+const refresh = (): Promise<void> => load(true);
 onMounted(refresh);
+
+const onPage = (p: number): void => {
+  store.familiesPage = p;
+  void load(false);
+};
+const onPageSize = (size: number): void => {
+  store.familiesPageSize = size;
+  store.familiesPage = 1;
+  void load(false);
+};
 
 const onAdd = async (f: Family): Promise<void> => {
   submitting.value = true;
@@ -87,7 +98,12 @@ const columns = [
       :rows="store.families"
       :columns="columns"
       :loading="store.loading"
+      :total="store.familiesTotal"
+      :page="store.familiesPage"
+      :page-size="store.familiesPageSize"
       empty-text="No families."
+      @update:page="onPage"
+      @update:page-size="onPageSize"
     />
 
     <BaseModal

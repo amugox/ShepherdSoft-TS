@@ -3,6 +3,7 @@ export * from './api/actions';
 export { API_STATUS } from './api/status';
 export type { ApiStatus } from './api/status';
 export * from './domain/enums';
+export * from './domain/page';
 export * from './domain/branch';
 export * from './domain/user';
 export * from './domain/member';

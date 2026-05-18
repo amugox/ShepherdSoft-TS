@@ -81,7 +81,7 @@ const load = async (): Promise<void> => {
   loading.value = true;
   try {
     guest.value     = (await guestApi.get(guestCode.value)) ?? null;
-    followUps.value = (await guestApi.findFollowUps(guestCode.value)) ?? [];
+    followUps.value = (await guestApi.findFollowUps({ code: guestCode.value }))?.rows ?? [];
   } catch (err) {
     toast.error(err instanceof Error ? err.message : 'Failed to load guest.');
   } finally {
