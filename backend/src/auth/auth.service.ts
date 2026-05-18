@@ -466,8 +466,6 @@ export class AuthService {
     const tokenHash = hashPassword(rawToken, admin.salt);
     const sessionId = randomUUID().replace(/-/g, '');
     const nextSessionCode = await this.allocateSessionCode();
-    const roleName = this.getRoleName(admin.user_role);
-
     await this.prisma.user_sessions.create({
       data: {
         sess_code: nextSessionCode,

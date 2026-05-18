@@ -81,7 +81,18 @@ describe('AuthService', () => {
       user_role: 1,
       change_pwd: false,
     });
-    prisma.$queryRawUnsafe.mockResolvedValueOnce([{ next_code: 91 }]);
+    prisma.$queryRawUnsafe
+      .mockResolvedValueOnce([{
+        user_code: 44,
+        user_type: 1,
+        br_code: 0,
+        user_name: 'sys.admin',
+        member_code: null,
+        email: 'sys@example.com',
+        full_name: 'System Admin',
+        user_role: 1,
+      }])
+      .mockResolvedValueOnce([{ next_code: 91 }]);
 
     const result = await service.login({ Username: 'sys.admin', Password: 'secret', AdminOnly: true });
 
