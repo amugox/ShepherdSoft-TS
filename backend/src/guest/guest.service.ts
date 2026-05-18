@@ -114,12 +114,8 @@ export class GuestService {
       const rows = await this.followups.findByGuest(p.code);
       return { rows, total: rows.length, page: 1, pageSize: Math.max(rows.length, 1) };
     }
-<<<<<<< HEAD
     const branchCode = this.readBranchScopeOrUndefined(caller);
-    return this.followups.findPending(branchCode);
-=======
-    return this.followups.findPending(p);
->>>>>>> a7445f1 (feat: add server-side pagination to DataTable list views)
+    return this.followups.findPending(p, branchCode);
   }
 
   private async completeFollowUp(p?: GuestFollowUpCompletePayload): Promise<unknown> {

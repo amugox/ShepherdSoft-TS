@@ -1,4 +1,4 @@
-import { createParamDecorator, UnauthorizedException } from '@nestjs/common';
+import { createParamDecorator, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 
 import type { RequestHeaderDto } from '../envelope/api-request.dto';
 import type { RequestWithCaller } from '../envelope/types';
@@ -8,8 +8,8 @@ import type { RequestWithCaller } from '../envelope/types';
  * The header is populated by CallerInterceptor from the verified JWT,
  * so handlers can trust br_code / ucode / sid without re-validating.
  */
-export const Caller = createParamDecorator<unknown, RequestHeaderDto>(
-  (_data, ctx) => {
+export const Caller = createParamDecorator(
+  (_data: unknown, ctx: ExecutionContext): RequestHeaderDto => {
     const req = ctx.switchToHttp().getRequest<RequestWithCaller>();
     if (!req.caller) {
       throw new UnauthorizedException('Caller context missing — route requires authentication.');

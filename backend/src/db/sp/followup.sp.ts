@@ -99,40 +99,30 @@ export class FollowUpSp {
     return normRows<GuestFollowUp>(rows) as GuestFollowUp[];
   }
 
-<<<<<<< HEAD
-  async findPending(branchCode?: number): Promise<GuestFollowUp[]> {
-    const rows = await this.prisma.$queryRawUnsafe(
-      `${FU_SELECT}
-       WHERE followup_status = 0
-         AND (? IS NULL OR guest_code IN (
-           SELECT guest_code FROM guests WHERE br_code = ?
-         ))
-       ORDER BY followup_date ASC, followup_code ASC
-       LIMIT 200`,
-      branchCode ?? null,
-      branchCode ?? null,
-    ) as unknown[];
-    return normRows<GuestFollowUp>(rows) as GuestFollowUp[];
-=======
-  async findPending(p?: SearchPayload): Promise<PageResult<GuestFollowUp>> {
+  async findPending(p?: SearchPayload, branchCode?: number): Promise<PageResult<GuestFollowUp>> {
     const clamped = clampPage(p);
-    const WHERE = `WHERE followup_status = 0`;
+    const WHERE = `WHERE followup_status = 0
+       AND (? IS NULL OR guest_code IN (
+         SELECT guest_code FROM guests WHERE br_code = ?
+       ))`;
+    const params = [branchCode ?? null, branchCode ?? null];
 
     const [rows, countRows] = await Promise.all([
       this.prisma.$queryRawUnsafe(
         `${FU_SELECT} ${WHERE}
          ORDER BY followup_date ASC, followup_code ASC
          LIMIT ? OFFSET ?`,
+        ...params,
         clamped.pageSize,
         clamped.offset,
       ) as Promise<unknown[]>,
       this.prisma.$queryRawUnsafe(
         `SELECT COUNT(*) AS total FROM vw_guestfollowups ${WHERE}`,
+        ...params,
       ) as Promise<unknown[]>,
     ]);
 
     const total = Number((countRows[0] as { total?: bigint | number })?.total ?? 0);
     return pageResult(normRows<GuestFollowUp>(rows) as GuestFollowUp[], total, clamped);
->>>>>>> a7445f1 (feat: add server-side pagination to DataTable list views)
   }
 }

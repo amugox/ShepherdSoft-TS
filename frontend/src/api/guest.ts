@@ -6,7 +6,6 @@ import {
   type GuestFollowUpCompletePayload,
   type GuestFollowUpPayload,
   type GuestFollowUpReschedulePayload,
-  type GuestPagedResult,
   type GuestPromotePayload,
   type GuestStats,
   type PageResult,
@@ -16,13 +15,8 @@ import {
 import { call } from './envelope';
 
 export const guestApi = {
-<<<<<<< HEAD
-  find: (filter: GuestFilter): Promise<GuestPagedResult | undefined> =>
-    call<GuestPagedResult>('guest', HTTP_API_ACTION.GUEST_FIND, filter),
-=======
   find: (filter: GuestFilter): Promise<PageResult<Guest> | undefined> =>
     call<PageResult<Guest>>('guest', HTTP_API_ACTION.GUEST_FIND, filter),
->>>>>>> a7445f1 (feat: add server-side pagination to DataTable list views)
 
   get: (code: number): Promise<Guest | undefined> =>
     call<Guest>('guest', HTTP_API_ACTION.GUEST_GET, { code }),
