@@ -141,7 +141,7 @@ const goToRequestStep = (): void => {
         </BaseButton>
         <BaseButton
           type="button"
-          variant="ghost"
+          variant="secondary"
           @click="goToRequestStep"
         >
           Request a new code
